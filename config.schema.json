@@ -6,11 +6,26 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
+      "devices": {
+        "title": "Devices",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "mac": {
+              "title": "MAC address",
+              "description": "Bluetooth MAC address of the device",
+              "type": "string",
+              "required": true
+            },
+            "encryption_key": {
+              "title": "Encryption key",
+              "description": "The key used to encrypt the advertisment data (optional)",
+              "type": "string",
+              "required": false
+            }
+          }
+        }
       }
     }
   }
