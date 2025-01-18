@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { EventEmitter } from 'events';
 
-import { BTHomeSensorData, BTHomeDecryptionError } from './types.js';
+import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 
 type DecryptionResult = {
   data: Buffer,
@@ -9,9 +9,9 @@ type DecryptionResult = {
 };
 
 export class BTHomeDevice {
-  public static readonly UUID = Buffer.from('FCD2', 'hex');
+  public static readonly UUID = 'FCD2';
 
-  private static readonly UUID_LE = Buffer.from(BTHomeDevice.UUID).reverse();
+  private static readonly UUID_LE = Buffer.from(BTHomeDevice.UUID, 'hex').reverse();
   private static readonly MAX_COUNTER_VALUE = 4294967295;
   private static readonly UPDATE_EVENT = 'update';
 
@@ -27,8 +27,15 @@ export class BTHomeDevice {
   }
 
   update(payload: Buffer) {
-    this.lastSensorData = this.decodePayload(payload);
-    this.events.emit(BTHomeDevice.UPDATE_EVENT, this.lastSensorData);
+    const newSensorData = this.decodePayload(payload);
+
+    // Deduplicate repeated events if id is present
+    if (this.lastSensorData?.id && this.lastSensorData.id === newSensorData.id) {
+      return;
+    }
+
+    this.lastSensorData = newSensorData;
+    this.events.emit(BTHomeDevice.UPDATE_EVENT, newSensorData);
   }
 
   onUpdate(callback: (data: BTHomeSensorData) => void) {
@@ -141,9 +148,121 @@ export class BTHomeDevice {
         result.humidity = data.readUInt8(offset + 1);
         offset += 2;
         break;
+
+      case 0x3A:
+        result.button = this.decodeButtonEvent(data.readUint8(offset + 1));
+        offset += 2;
+        break;
+
+      // Not implemented
+      case 0x09:
+      case 0x2F:
+      case 0x59:
+      case 0x46:
+      case 0x15:
+      case 0x16:
+      case 0x17:
+      case 0x18:
+      case 0x19:
+      case 0x1A:
+      case 0x1B:
+      case 0x1C:
+      case 0x0F:
+      case 0x1D:
+      case 0x1E:
+      case 0x1F:
+      case 0x20:
+      case 0x21:
+      case 0x22:
+      case 0x23:
+      case 0x11:
+      case 0x24:
+      case 0x10:
+      case 0x25:
+      case 0x26:
+      case 0x27:
+      case 0x28:
+      case 0x29:
+      case 0x2A:
+      case 0x2B:
+      case 0x2C:
+      case 0x2D:
+        offset += 2;
+        // Fallthrough
+      case 0x06:
+      case 0x07:
+      case 0x08:
+      case 0x0C:
+      case 0x0D:
+      case 0x0E:
+      case 0x13:
+      case 0x14:
+      case 0x3D:
+      case 0x3F:
+      case 0x40:
+      case 0x41:
+      case 0x43:
+      case 0x47:
+      case 0x48:
+      case 0x49:
+      case 0x4A:
+      case 0x51:
+      case 0x52:
+      case 0x5A:
+      case 0x5D:
+      case 0xF0:
+        offset += 3;
+        // Fallthrough
+      case 0x42:
+      case 0x0A:
+      case 0x05:
+      case 0x0B:
+      case 0x04:
+      case 0x4B:
+      case 0x3C:
+      case 0xF2:
+        offset += 4;
+        // Fallthrough
+      case 0x3E:
+      case 0x4C:
+      case 0x4D:
+      case 0x4E:
+      case 0x4F:
+      case 0x50:
+      case 0x5B:
+      case 0x5C:
+      case 0x55:
+      case 0xF1:
+        offset += 5;
+        break;
+      default:
+        throw new BTHomeDecodingError('Payload contains unsupported object ids.');
       }
     }
 
     return result;
+  }
+
+  private decodeButtonEvent(state: number) {
+    switch(state) {
+    case 0x00:
+      return ButtonEvent.None;
+    case 0x01:
+      return ButtonEvent.SinglePress;
+    case 0x02:
+      return ButtonEvent.DoublePress;
+    case 0x03:
+      return ButtonEvent.TriplePress;
+    case 0x04:
+      return ButtonEvent.LongPress;
+    case 0x05:
+      return ButtonEvent.LongDoublePress;
+    case 0x06:
+      return ButtonEvent.LongTriplePress;
+    case 0x80:
+      return ButtonEvent.HoldPress;
+    default:
+      throw new BTHomeDecodingError('Unsupported button event.');
+    }
   }
 }
