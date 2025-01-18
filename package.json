@@ -43,7 +43,7 @@
     "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-25",
+    "@stoprocent/noble": "^1.18.2",
     "homebridge-lib": "^7.1.0"
   }
 }
