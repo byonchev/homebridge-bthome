@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { EventEmitter } from 'events';
 
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 
@@ -13,17 +12,19 @@ export class BTHomeDevice {
 
   private static readonly UUID_LE = Buffer.from(BTHomeDevice.UUID, 'hex').reverse();
   private static readonly MAX_COUNTER_VALUE = 4294967295;
-  private static readonly UPDATE_EVENT = 'update';
 
   private readonly mac: Buffer;
   private readonly encryptionKey?: Buffer;
-  private readonly events: EventEmitter = new EventEmitter();
 
   private lastSensorData?: BTHomeSensorData;
 
-  constructor(mac: string, encryptionKey?: string) {
+  constructor(mac: string, encryptionKey?: string, initialPayload?: Buffer) {
     this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
     this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
+
+    if (initialPayload) {
+      this.update(initialPayload);
+    }
   }
 
   update(payload: Buffer) {
@@ -35,11 +36,14 @@ export class BTHomeDevice {
     }
 
     this.lastSensorData = newSensorData;
-    this.events.emit(BTHomeDevice.UPDATE_EVENT, newSensorData);
   }
 
-  onUpdate(callback: (data: BTHomeSensorData) => void) {
-    return this.events.on(BTHomeDevice.UPDATE_EVENT, callback);
+  getSensorData() : BTHomeSensorData | null {
+    if (!this.lastSensorData) {
+      return null;
+    }
+
+    return Object.assign({}, this.lastSensorData);
   }
 
   private decodePayload(payload: Buffer): BTHomeSensorData {
@@ -77,7 +81,7 @@ export class BTHomeDevice {
     const newCounterValue = counter.readUint32LE();
 
     if (previousCounterValue < BTHomeDevice.MAX_COUNTER_VALUE && newCounterValue < previousCounterValue) {
-      throw new BTHomeDecryptionError('Reused previous counter value in encrypted payload. Possible replay attack.');
+      throw new BTHomeDecryptionError('Reused previous counter value in encrypted payload. Possible replay attack');
     }
 
     const nonce = Buffer.concat([this.mac, BTHomeDevice.UUID_LE, Buffer.from([flags]), counter]);
@@ -108,7 +112,9 @@ export class BTHomeDevice {
     let offset = 0;
 
     while (offset < data.length) {
-      switch (data[offset]) {
+      const objectId = data[offset];
+
+      switch (objectId) {
       // ID
       case 0x00:
         result.id = data.readUInt8(offset + 1);
@@ -188,7 +194,7 @@ export class BTHomeDevice {
       case 0x2C:
       case 0x2D:
         offset += 2;
-        // Fallthrough
+        break;
       case 0x06:
       case 0x07:
       case 0x08:
@@ -212,7 +218,7 @@ export class BTHomeDevice {
       case 0x5D:
       case 0xF0:
         offset += 3;
-        // Fallthrough
+        break;
       case 0x42:
       case 0x0A:
       case 0x05:
@@ -222,7 +228,7 @@ export class BTHomeDevice {
       case 0x3C:
       case 0xF2:
         offset += 4;
-        // Fallthrough
+        break;
       case 0x3E:
       case 0x4C:
       case 0x4D:
@@ -235,8 +241,12 @@ export class BTHomeDevice {
       case 0xF1:
         offset += 5;
         break;
+      case 0x53:
+      case 0x54:
+        offset += data.readUint8(offset + 1) + 2;
+        break;
       default:
-        throw new BTHomeDecodingError('Payload contains unsupported object ids.');
+        throw new BTHomeDecodingError('Unsupported object id in payload: ' + objectId);
       }
     }
 
@@ -262,7 +272,7 @@ export class BTHomeDevice {
     case 0x80:
       return ButtonEvent.HoldPress;
     default:
-      throw new BTHomeDecodingError('Unsupported button event.');
+      throw new BTHomeDecodingError('Unsupported button event');
     }
   }
 }

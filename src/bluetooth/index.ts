@@ -13,12 +13,13 @@ export class BluetoothScanner {
     this.serviceUuid = serviceUuid.toLocaleLowerCase();
   }
 
-  async start() {
+  async start(timeout? : number) {
     noble.on('discover', this.onDiscoverInternal.bind(this));
 
     try {
-      await noble.waitForPoweredOn();
-      await noble.startScanningAsync([], true);
+      await noble.waitForPoweredOn(timeout);
+      await noble.stopScanningAsync();
+      await noble.startScanningAsync([this.serviceUuid], true);
     } catch (error) {
       let message = 'Unknown bluetooth error';
       
@@ -39,18 +40,24 @@ export class BluetoothScanner {
   }
 
   private onDiscoverInternal(peripheral: Peripheral) {
-    const services = peripheral.advertisement.serviceData || [];
+    const advertisementData = peripheral.advertisement;
+    const services = advertisementData.serviceData || [];
     const service = services.find((service) => service.uuid.toLowerCase() === this.serviceUuid);
-    
+
     if (!service) {
       return;
     }
 
-    const device : BluetoothDevice = {
-      mac: peripheral.address.toLowerCase(),
-      serviceData: service.data,
-    };
+    const mac = peripheral.address.toLowerCase();
+    const name = advertisementData.localName || this.generateDeviceName(mac);
+    const serviceData = service.data;
+
+    const device : BluetoothDevice = { name, mac, serviceData };
 
     this.events.emit(BluetoothScanner.DISCOVER_EVENT, device);
+  }
+
+  private generateDeviceName(mac: string) {
+    return 'BLE' + mac.replaceAll(':', '').slice(6).toUpperCase();
   }
 }
