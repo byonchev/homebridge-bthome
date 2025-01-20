@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { EventEmitter } from 'events';
 
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 
@@ -12,9 +13,11 @@ export class BTHomeDevice {
 
   private static readonly UUID_LE = Buffer.from(BTHomeDevice.UUID, 'hex').reverse();
   private static readonly MAX_COUNTER_VALUE = 4294967295;
+  private static readonly UPDATE_EVENT = 'update';
 
   private readonly mac: Buffer;
   private readonly encryptionKey?: Buffer;
+  private readonly events : EventEmitter = new EventEmitter();
 
   private lastSensorData?: BTHomeSensorData;
 
@@ -36,6 +39,12 @@ export class BTHomeDevice {
     }
 
     this.lastSensorData = newSensorData;
+
+    this.events.emit(BTHomeDevice.UPDATE_EVENT, newSensorData);
+  }
+
+  onUpdate(callback: (data: BTHomeSensorData) => void) {
+    this.events.on(BTHomeDevice.UPDATE_EVENT, callback);
   }
 
   getSensorData() : BTHomeSensorData | null {
@@ -44,6 +53,10 @@ export class BTHomeDevice {
     }
 
     return Object.assign({}, this.lastSensorData);
+  }
+
+  getMACAddress() : string {
+    return this.mac.toString('hex');
   }
 
   private decodePayload(payload: Buffer): BTHomeSensorData {

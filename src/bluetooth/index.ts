@@ -58,6 +58,6 @@ export class BluetoothScanner {
   }
 
   private generateDeviceName(mac: string) {
-    return 'BLE' + mac.replaceAll(':', '').slice(6).toUpperCase();
+    return 'BLE ' + mac.replaceAll(':', '').slice(6).toUpperCase();
   }
 }
