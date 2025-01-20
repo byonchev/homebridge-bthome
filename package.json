@@ -3,7 +3,7 @@
   "displayName": "Homebridge BTHome",
   "type": "module",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "description": "A homebridge plugin that adds support for bluetooth devices that use BTHome protocol.",
   "author": "Boris Yonchev",
   "license": "Apache-2.0",
