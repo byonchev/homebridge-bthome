@@ -45,9 +45,9 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 | Multiple Bluetooth Devices**          | :x:                |
 | Multiple Sensor Readings of Same Type | :x:                |
 
-**Notes:**
-- *Occasional Sensor Data:* This refers to data not consistently present in the device payload. For instance, the Shelly BLU H&T device only reports its push button state when the button is pressed; this data is absent in periodic updates.
-- **Multiple Bluetooth Devices:** If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
+#### Notes:
+- *\*Occasional Sensor Data:* This refers to data not consistently present in the device payload. For instance, the Shelly BLU H&T device only reports its push button state when the button is pressed; this data is absent in periodic updates.
+- *\*\*Multiple Bluetooth Devices:* If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
 
 ### Contributing
 
