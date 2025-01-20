@@ -52,7 +52,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
       this.log.info('Bluetooth scanner started');
     } catch (error) {
-      this.log.error('Failed to initialize bluetooth scanner', error);
+      this.log.error('Failed to initialize bluetooth scanner: ', error);
     }
   }
 
@@ -92,7 +92,11 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.accessories.set(accessory.UUID, accessory);
     }
 
-    accessory.context.device.update(device.serviceData);
+    try {
+      accessory.context.device.update(device.serviceData);
+    } catch (error) {
+      this.log.error('Failed to update BTHome device: ', error);
+    }
 
   }
 
