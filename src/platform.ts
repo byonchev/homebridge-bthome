@@ -45,14 +45,19 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   }
 
   async discoverDevices() {
-    try {
-      this.scanner.onDiscover(this.onDeviceDiscovered.bind(this));
+    if (!this.config.devices || this.config.devices.length === 0) {
+      this.log.warn('No devices configured');
+      return;
+    }
 
+    try {
       await this.scanner.start(this.config.bluetooth?.powerOnTimeout);
+
+      this.scanner.onDiscover(this.onDeviceDiscovered.bind(this));
 
       this.log.info('Bluetooth scanner started');
     } catch (error) {
-      this.log.error('Failed to initialize bluetooth scanner: ', error);
+      this.log.error('Failed to initialize bluetooth scanner:', error);
     }
   }
 

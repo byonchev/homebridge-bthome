@@ -9,16 +9,21 @@ export class BluetoothScanner {
   private readonly serviceUuid: string;
   private readonly events: EventEmitter = new EventEmitter();
 
+  private started: boolean = false;
+
   constructor(serviceUuid: string) {
     this.serviceUuid = serviceUuid.toLocaleLowerCase();
   }
 
   async start(timeout? : number) {
-    noble.on('discover', this.onDiscoverInternal.bind(this));
-
     try {
       await noble.waitForPoweredOn(timeout);
+
+      noble.on('discover', this.onDiscoverInternal.bind(this));
+
       await noble.startScanningAsync([this.serviceUuid], true);
+
+      this.started = true;
     } catch (error) {
       let message = 'Unknown bluetooth error';
       
@@ -31,6 +36,10 @@ export class BluetoothScanner {
   }
 
   async stop() {
+    if (!this.started) {
+      return;
+    }
+
     return noble.stopScanningAsync();
   }
 
