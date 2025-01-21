@@ -259,7 +259,7 @@ export class BTHomeDevice {
         offset += data.readUint8(offset + 1) + 2;
         break;
       default:
-        throw new BTHomeDecodingError('Unsupported object id in payload: ' + objectId);
+        throw new BTHomeDecodingError('Unsupported object id in payload: 0x' + objectId.toString(16));
       }
     }
 
@@ -283,9 +283,10 @@ export class BTHomeDevice {
     case 0x06:
       return ButtonEvent.LongTriplePress;
     case 0x80:
+    case 0xFE:
       return ButtonEvent.HoldPress;
     default:
-      throw new BTHomeDecodingError('Unsupported button event');
+      throw new BTHomeDecodingError('Unsupported button event: 0x' + state.toString(16));
     }
   }
 }
