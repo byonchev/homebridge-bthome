@@ -26,6 +26,20 @@
             }
           }
         }
+      },
+      "bluetooth": {
+        "title": "Bluetooth settings",
+        "type": "object",
+        "properties": {
+          "powerOnTimeout": {
+            "title": "Device power on timeout",
+            "description": "Maximum time (in ms) to wait for the bluetooth device to be powered on",
+            "type": "integer",
+            "minimum": 1000,
+            "default": 10000,
+            "required": true
+          }
+        }
       }
     }
   }

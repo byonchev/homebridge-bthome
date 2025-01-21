@@ -18,7 +18,6 @@ export class BluetoothScanner {
 
     try {
       await noble.waitForPoweredOn(timeout);
-      await noble.stopScanningAsync();
       await noble.startScanningAsync([this.serviceUuid], true);
     } catch (error) {
       let message = 'Unknown bluetooth error';

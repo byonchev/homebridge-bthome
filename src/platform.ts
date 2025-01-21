@@ -48,7 +48,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     try {
       this.scanner.onDiscover(this.onDeviceDiscovered.bind(this));
 
-      await this.scanner.start();
+      await this.scanner.start(this.config.bluetooth?.powerOnTimeout);
 
       this.log.info('Bluetooth scanner started');
     } catch (error) {
