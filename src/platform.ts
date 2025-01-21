@@ -80,9 +80,10 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     }
 
     if (!accessory) {
-      this.log.info('Adding new accessory:', device.name);
+      const name = config.name || device.name;
+      this.log.info('Adding new accessory:', name);
 
-      accessory = new this.api.platformAccessory(device.name, uuid);
+      accessory = new this.api.platformAccessory(name, uuid);
       accessory.context.device = new BTHomeDevice(mac, config.encryptionKey, device.serviceData);
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);

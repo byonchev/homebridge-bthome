@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a14b3ec2-8863-430c-bee7-d49f9f3443d5">
+  <img width="410px" src="https://github.com/user-attachments/assets/999cf798-d454-4df7-998f-af1d9850f0fd">
 </p>
 
 # homebridge-bthome

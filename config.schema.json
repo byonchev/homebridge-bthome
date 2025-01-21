@@ -6,12 +6,23 @@
   "schema": {
     "type": "object",
     "properties": {
+      "name": {
+        "title": "Plugin Name",
+        "type": "string",
+        "default": "BTHome",
+        "required": true
+      },
       "devices": {
         "title": "Devices",
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
+            "name": {
+              "title": "Name",
+              "description": "Display name for the device",
+              "type": "string"
+            },
             "mac": {
               "title": "MAC address",
               "description": "Bluetooth MAC address of the device",

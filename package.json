@@ -2,8 +2,7 @@
   "name": "homebridge-bthome",
   "displayName": "Homebridge BTHome",
   "type": "module",
-  "version": "1.0.2",
-  "private": false,
+  "version": "1.0.3",
   "description": "A homebridge plugin that adds support for bluetooth devices that use BTHome protocol.",
   "author": "Boris Yonchev",
   "license": "Apache-2.0",
@@ -16,7 +15,12 @@
     "url": "https://github.com/byonchev/homebridge-bthome/issues"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge",
+    "homebridge-plugin",
+    "homebridge-bthome",
+    "bthome",
+    "ble",
+    "shelly"
   ],
   "main": "dist/index.js",
   "engines": {
