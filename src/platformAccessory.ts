@@ -2,12 +2,14 @@ import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge
 
 import type { BTHomePlatform } from './platform.js';
 import { BTHomeDevice } from './bthome/index.js';
-import { ButtonEvent } from './bthome/types.js';
+import { BTHomeSensorData, ButtonEvent } from './bthome/types.js';
 
 export class BTHomeAccessory {
   private static readonly LOW_BATTERY_PERCENTAGE = 20;
 
   private readonly configuredServices : Set<typeof Service> = new Set();
+
+  private readonly lastKnownSensorValues = new Map();
 
   constructor(
     private readonly platform: BTHomePlatform,
@@ -25,7 +27,13 @@ export class BTHomeAccessory {
     device.onUpdate(this.onDeviceUpdate.bind(this));
   }
 
-  private onDeviceUpdate() {
+  private onDeviceUpdate(sensorData: BTHomeSensorData) {
+    type SensorKey = keyof typeof sensorData;
+
+    for (const key in sensorData) {
+      this.lastKnownSensorValues.set(key, sensorData[key as SensorKey]);
+    }
+
     // Support dynamic services that are not included with each payload
     this.setupServices();
 
@@ -41,14 +49,29 @@ export class BTHomeAccessory {
     const key = sensorType as SensorKey;
 
     if (!sensorData || !sensorData[key]) {
-      const mac = device.getMACAddress();
-
-      this.platform.log.warn('BTHome device with MAC address ' + mac + ' has not provided value for ' + sensorType + ' reading');
-
       return null;
     }
 
     return sensorData[key];
+  }
+
+  private getCharacteristicValue(sensorType: string, fallback: CharacteristicValue) {
+    const value = this.getSensorData(sensorType);
+
+    if (value) {
+      return value;
+    }
+
+    const message = 'Device ' + this.accessory.displayName + ' has not provided value for ' + sensorType + ' reading. ';
+
+    const lastKnownValue = this.lastKnownSensorValues.get(sensorType);
+    if (lastKnownValue) {
+      this.platform.log.warn(message + 'Reusing previously known value...');
+      return lastKnownValue;
+    }
+
+    this.platform.log.error(message + 'Using invalid value ' + fallback + ' to satisfy characteristic...');
+    return fallback;
   }
 
   /* Sensor specific characteristic and events begin here */
@@ -128,19 +151,19 @@ export class BTHomeAccessory {
   }
 
   private getTemperature() : CharacteristicValue {
-    return this.getSensorData('temperature') ?? -270;
+    return this.getCharacteristicValue('temperature', -270);
   }
 
   private getHumidity() : CharacteristicValue {
-    return this.getSensorData('humidity') ?? 0;
+    return this.getCharacteristicValue('humidity', 0);
   }
 
   private getBatteryLevel() : CharacteristicValue {
-    return this.getSensorData('battery') ?? 0;
+    return this.getCharacteristicValue('battery', 100);
   }
 
   private getLowBatteryStatus() : CharacteristicValue {
-    return (this.getSensorData('battery') ?? 100) < BTHomeAccessory.LOW_BATTERY_PERCENTAGE;
+    return this.getCharacteristicValue('battery', 100) < BTHomeAccessory.LOW_BATTERY_PERCENTAGE;
   }
 
   private handleButtonEvent(event: ButtonEvent) {
