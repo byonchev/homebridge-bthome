@@ -4,7 +4,9 @@ export type BTHomeSensorData = {
     temperature?: number,
     humidity?: number,
     battery?: number,
-    button?: ButtonEvent
+    button?: ButtonEvent,
+    illuminance?: number,
+    motionDetected?: boolean,
 };
 
 export enum ButtonEvent {

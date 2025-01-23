@@ -34,6 +34,21 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 - Relative Humidity
 - Battery Level
 - Push Button
+- Illuminance
+- Motion detection
+
+### Supported devices
+This is a list of devices that should work with this plugin. Some of them aren't tested (see table below).
+
+If you own some of the untested devices and the plugin works for you, please let me know so I can update its status.
+
+| Device                   | Tested             |
+| ------------------------ | ------------------ |
+| Shelly BLU H&T           | :heavy_check_mark: |
+| Shelly BLU Button        | :x:                |
+| Shelly BLU Wall Switch   | :x:                |
+| Shelly BLU RC Button     | :x:                |
+| Shelly BLU Motion        | :x:                |
 
 <a id="supported_features"></a>
 ### Supported Features
