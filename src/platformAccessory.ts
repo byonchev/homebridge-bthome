@@ -120,6 +120,26 @@ export class BTHomeAccessory {
         serviceType: this.platform.Service.StatelessProgrammableSwitch,
         characteristicHandlers: [],
       },
+      {
+        dataKey: 'illuminance',
+        serviceType: this.platform.Service.LightSensor,
+        characteristicHandlers: [
+          {
+            characteristic: this.platform.Characteristic.CurrentAmbientLightLevel,
+            handler: this.getIlluminance,
+          },
+        ],
+      },
+      {
+        dataKey: 'motionDetected',
+        serviceType: this.platform.Service.MotionSensor,
+        characteristicHandlers: [
+          {
+            characteristic: this.platform.Characteristic.MotionDetected,
+            handler: this.getMotionDetected,
+          },
+        ],
+      },
     ];
 
     servicesConfig.forEach(({ dataKey, serviceType, characteristicHandlers }) => {
@@ -164,6 +184,14 @@ export class BTHomeAccessory {
 
   private getLowBatteryStatus() : CharacteristicValue {
     return this.getCharacteristicValue('battery', 100) < BTHomeAccessory.LOW_BATTERY_PERCENTAGE;
+  }
+
+  private getIlluminance(): CharacteristicValue {
+    return this.getCharacteristicValue('illuminance', 100000);
+  }
+
+  private getMotionDetected(): CharacteristicValue {
+    return this.getCharacteristicValue('motionDetected', false);
   }
 
   private handleButtonEvent(event: ButtonEvent) {

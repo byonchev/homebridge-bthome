@@ -163,8 +163,21 @@ export class BTHomeDevice {
         offset += 2;
         break;
 
+      // Button
       case 0x3A:
         result.button = this.decodeButtonEvent(data.readUint8(offset + 1));
+        offset += 2;
+        break;
+
+      // Illuminance
+      case 0x05:
+        result.illuminance = data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16);
+        offset += 4;
+        break;
+
+      // Motion
+      case 0x21:
+        result.motionDetected = (data.readUint8(offset + 1) === 1);
         offset += 2;
         break;
 
@@ -186,7 +199,6 @@ export class BTHomeDevice {
       case 0x1E:
       case 0x1F:
       case 0x20:
-      case 0x21:
       case 0x22:
       case 0x23:
       case 0x11:
@@ -229,7 +241,6 @@ export class BTHomeDevice {
         break;
       case 0x42:
       case 0x0A:
-      case 0x05:
       case 0x0B:
       case 0x04:
       case 0x4B:
