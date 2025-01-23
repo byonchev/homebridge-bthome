@@ -24,11 +24,6 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
-    this.api.on('shutdown', async () => {
-      await this.scanner.stop();
-      this.log.debug('Bluetooth scanner stopped');
-    });
-
     this.log.debug('Finished initializing platform:', this.config.platform);
 
     this.api.on('didFinishLaunching', () => {
