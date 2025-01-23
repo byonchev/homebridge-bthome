@@ -47,7 +47,10 @@
     "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
-    "@stoprocent/noble": "^1.18.2",
     "homebridge-lib": "^7.1.0"
+  },
+  "optionalDependencies": {
+    "@stoprocent/bluetooth-hci-socket": "^1.4.4",
+    "@stoprocent/noble": "^1.18.2"
   }
 }

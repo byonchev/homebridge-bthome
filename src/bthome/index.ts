@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { EventEmitter } from 'events';
 
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
+import { wrapError } from '../util/errors.js';
 
 type DecryptionResult = {
   data: Buffer,
@@ -109,13 +110,7 @@ export class BTHomeDevice {
         counter: counter.readUint32LE(),
       };
     } catch (error) {
-      let message = 'Unknown decryption error';
-
-      if (error instanceof Error) {
-        message = error.message;
-      }
-
-      throw new BTHomeDecryptionError(message);
+      throw wrapError(error, BTHomeDecryptionError, 'Unknown decryption error');    
     }
   }
 
