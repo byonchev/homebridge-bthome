@@ -1,5 +1,6 @@
 export type BTHomeSensorData = {
     id?: number,
+    firmwareVersion?: string,
     counter?: number,
     temperature?: number,
     humidity?: number,

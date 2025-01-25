@@ -15,12 +15,13 @@ export class BTHomeAccessory {
     private readonly platform: BTHomePlatform,
     private readonly accessory: PlatformAccessory,
   ) {
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
-
     const device : BTHomeDevice = this.getDevice();
+    const manufacturerData = device.getManufacturerData();
+
+    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, manufacturerData.manufacturer || 'Unknown')
+      .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
     this.setupServices();
 
@@ -74,7 +75,7 @@ export class BTHomeAccessory {
     return fallback;
   }
 
-  /* Sensor specific characteristic and events begin here */
+  /* Characteristics related code begin here */
 
   private setupServices() {
     const device = this.getDevice();
@@ -164,6 +165,10 @@ export class BTHomeAccessory {
     if (sensorData?.button) {
       this.handleButtonEvent(sensorData.button);
     }
+
+    if (sensorData?.firmwareVersion) {
+      this.updateFirmwareVersion(sensorData.firmwareVersion);
+    }
   }
 
   private getDevice() : BTHomeDevice {
@@ -222,5 +227,14 @@ export class BTHomeAccessory {
     }
   }
 
-  /* Sensor specific characteristic and events end here */
+  private updateFirmwareVersion(version: string) {
+    const service = this.accessory.getService(this.platform.Service.AccessoryInformation);
+    if (!service) {
+      return;
+    }
+
+    service.setCharacteristic(this.platform.Characteristic.FirmwareRevision, version);
+  }
+
+  /* Characteristics related code end here */
 }

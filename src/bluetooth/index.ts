@@ -1,8 +1,9 @@
 import { Peripheral } from '@stoprocent/noble';
 import { EventEmitter } from 'events';
 
-import { BluetoothDevice, BluetoothError } from './types.js';
+import { BluetoothDevice, ManufacturerData, BluetoothError } from './types.js';
 import { wrapError } from '../util/errors.js';
+import { decodeShellyManufacturerData } from './shelly.js';
 
 export class BluetoothScanner {
   private static readonly DISCOVER_EVENT = 'discover';
@@ -71,14 +72,35 @@ export class BluetoothScanner {
 
     const mac = peripheral.address.toLowerCase();
     const name = advertisementData.localName || this.generateDeviceName(mac);
-    const serviceData = service.data;
 
-    const device : BluetoothDevice = { name, mac, serviceData };
+    const serviceData = service.data;
+    const manufacturerData = this.decodeManufacturerData(advertisementData.manufacturerData);
+
+    if (!manufacturerData.serialNumber) {
+      manufacturerData.serialNumber = mac;
+    }
+
+    const device : BluetoothDevice = { name, mac, serviceData, manufacturerData };
 
     this.events.emit(BluetoothScanner.DISCOVER_EVENT, device);
   }
 
   private generateDeviceName(mac: string) {
     return 'BLE ' + mac.replaceAll(':', '').slice(6).toUpperCase();
+  }
+
+  private decodeManufacturerData(data? : Buffer) : ManufacturerData {
+    if (!data) {
+      return {};
+    }
+
+    const companyIdentifier = data.readUInt16LE(0);
+
+    switch(companyIdentifier) {
+    case 0x0BA9:
+      return decodeShellyManufacturerData(data);
+    default:
+      return {};
+    }
   }
 }

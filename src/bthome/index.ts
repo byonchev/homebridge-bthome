@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 import { wrapError } from '../util/errors.js';
+import { ManufacturerData } from '../bluetooth/types.js';
 
 type DecryptionResult = {
   data: Buffer,
@@ -17,13 +18,15 @@ export class BTHomeDevice {
   private static readonly UPDATE_EVENT = 'update';
 
   private readonly mac: Buffer;
+  private readonly manufacturerData: ManufacturerData;
   private readonly encryptionKey?: Buffer;
   private readonly events : EventEmitter = new EventEmitter();
 
-  private lastSensorData?: BTHomeSensorData;
+  private lastSensorData?: BTHomeSensorData;  
 
-  constructor(mac: string, encryptionKey?: string, initialPayload?: Buffer) {
+  constructor(mac: string, manufacturerData : ManufacturerData, encryptionKey?: string, initialPayload?: Buffer) {
     this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
+    this.manufacturerData = manufacturerData;
     this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
 
     if (initialPayload) {
@@ -58,6 +61,10 @@ export class BTHomeDevice {
 
   getMACAddress() : string {
     return this.mac.toString('hex');
+  }
+
+  getManufacturerData() : ManufacturerData {
+    return Object.assign({}, this.manufacturerData);
   }
 
   private decodePayload(payload: Buffer): BTHomeSensorData {
@@ -127,6 +134,16 @@ export class BTHomeDevice {
       case 0x00:
         result.id = data.readUInt8(offset + 1);
         offset += 2;
+        break;
+
+      // Firmware version
+      case 0xF1:
+        result.firmwareVersion = `${data[offset+4]}.${data[offset+3]}.${data[offset+2]}.${data[offset+1]}`;
+        offset += 5;
+        break;
+      case 0xF2:
+        result.firmwareVersion = `${data[offset+3]}.${data[offset+2]}.${data[offset+1]}`;
+        offset += 4;
         break;
 
       // Battery
@@ -245,7 +262,6 @@ export class BTHomeDevice {
       case 0x04:
       case 0x4B:
       case 0x3C:
-      case 0xF2:
         offset += 4;
         break;
       case 0x3E:
@@ -257,7 +273,6 @@ export class BTHomeDevice {
       case 0x5B:
       case 0x5C:
       case 0x55:
-      case 0xF1:
         offset += 5;
         break;
       case 0x53:
