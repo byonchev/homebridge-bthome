@@ -1,7 +1,14 @@
 export type BluetoothDevice = {
     name: string,
     mac: string,
-    serviceData: Buffer
+    serviceData: Buffer,
+    manufacturerData: ManufacturerData
+};
+
+export type ManufacturerData = {
+    manufacturer?: string,
+    model? : string,
+    serialNumber? : string
 };
 
 export class BluetoothError extends Error {}

@@ -74,7 +74,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     if (accessory && !this.handles.has(uuid)) {
       this.log.info('Restoring existing accessory from cache:', accessory.displayName);
 
-      accessory.context.device = new BTHomeDevice(mac, config.encryptionKey, device.serviceData);
+      accessory.context.device = new BTHomeDevice(mac, device.manufacturerData, config.encryptionKey, device.serviceData);
 
       this.handles.set(uuid, new BTHomeAccessory(this, accessory));
     }
@@ -84,7 +84,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.log.info('Adding new accessory:', name);
 
       accessory = new this.api.platformAccessory(name, uuid);
-      accessory.context.device = new BTHomeDevice(mac, config.encryptionKey, device.serviceData);
+      accessory.context.device = new BTHomeDevice(mac, device.manufacturerData, config.encryptionKey, device.serviceData);
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
