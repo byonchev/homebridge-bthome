@@ -3,19 +3,19 @@ import { ManufacturerData } from './types';
 function decodeModelName(identifier: number) : (string | undefined) {
   switch (identifier) {
   case 0x0001:
-    return 'Shelly BLU Button1';
+    return 'SBBT-002C';
   case 0x0002:
-    return 'Shelly BLU DoorWindow';
+    return 'SBDW-002C';
   case 0x0003:
-    return 'Shelly BLU HT';
+    return 'SBHT-003C';
   case 0x0005:
-    return 'Shelly BLU Motion';
+    return 'SBMO-003Z';
   case 0x0006:
-    return 'Shelly BLU Wall Switch 4';
+    return 'SBBT-004CEU';
   case 0x0007:
-    return 'Shelly BLU RC Button 4';
+    return 'SBBT-004CUS';
   case 0x0008:
-    return 'Shelly BLU TRV';
+    return 'SBTR-001AEU';
   }
 }
 

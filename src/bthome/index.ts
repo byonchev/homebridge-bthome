@@ -22,7 +22,7 @@ export class BTHomeDevice {
   private readonly encryptionKey?: Buffer;
   private readonly events : EventEmitter = new EventEmitter();
 
-  private lastSensorData?: BTHomeSensorData;  
+  private lastSensorData?: BTHomeSensorData;
 
   constructor(mac: string, manufacturerData : ManufacturerData, encryptionKey?: string, initialPayload?: Buffer) {
     this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
