@@ -70,11 +70,10 @@ export class BluetoothScanner {
       return;
     }
 
-    const mac = peripheral.address.toLowerCase();
-    const name = advertisementData.localName || this.generateDeviceName(mac);
-
     const serviceData = service.data;
     const manufacturerData = this.decodeManufacturerData(advertisementData.manufacturerData);
+    const mac = peripheral.address.toLowerCase() || manufacturerData?.mac?.toLowerCase() || 'unknown';
+    const name = advertisementData.localName || this.generateDeviceName(mac);
 
     if (!manufacturerData.serialNumber) {
       manufacturerData.serialNumber = mac;

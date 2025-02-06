@@ -63,7 +63,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
     const config = this.getDeviceConfiguration(mac);
     if (!config) {
-      this.log.debug('Skipping not configured device: ', mac);
+      this.log.debug('Skipping not configured device:', mac);
       return;
     }
 

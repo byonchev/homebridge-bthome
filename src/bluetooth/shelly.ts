@@ -31,6 +31,7 @@ export function decodeShellyManufacturerData(data: Buffer) : ManufacturerData {
       offset += 3;
       break;
     case 0x0A:
+      result.mac = data.subarray(offset + 1, offset + 7).reverse().toString('hex').match(/.{1,2}/g)?.join(':');
       offset += 7;
       break;
     case 0x0B:

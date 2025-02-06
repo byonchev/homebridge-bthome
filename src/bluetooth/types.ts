@@ -8,7 +8,8 @@ export type BluetoothDevice = {
 export type ManufacturerData = {
     manufacturer?: string,
     model? : string,
-    serialNumber? : string
+    serialNumber? : string,
+    mac?: string
 };
 
 export class BluetoothError extends Error {}
