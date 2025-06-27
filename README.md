@@ -10,9 +10,12 @@ Homebridge plugin for integrating BTHome devices into HomeKit
 
 ### Overview
 
-The `homebridge-bthome` plugin enables seamless integration of Bluetooth devices using the [BTHome](https://bthome.io/) data format into your HomeKit ecosystem.
+`homebridge-bthome` enables seamless integration of Bluetooth devices that communicate using the [BTHome](https://bthome.io/) data format into your HomeKit setup.
 
-Please note that the plugin is in its early development stage and currently supports a limited range of sensor types. <br/>Refer to the [Supported Features](#supported_features) section for detailed information.
+It works locally — no gateways or cloud services are required. The plugin connects directly to supported devices.
+
+> **Note:** This project is in active early development and currently supports a limited set of sensor types.  
+> See the [Supported Features](#supported_features) section for details.
 
 ### Prerequisites
 
@@ -40,7 +43,7 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 ### Supported devices
 This is a list of devices that should work with this plugin. Some of them aren't tested (see table below).
 
-If you own some of the untested devices and the plugin works for you, please let me know so I can update its status.
+If you own some of the untested devices and the plugin works for you, please let me know so I can update its status. 
 
 | Device                   | Tested             |
 | ------------------------ | ------------------ |
