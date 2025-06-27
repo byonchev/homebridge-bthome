@@ -30,7 +30,7 @@ export class BluetoothScanner {
       }
 
       const module = await import('@stoprocent/noble');
-      
+
       return module.default;
     } catch (error) {
       throw wrapError(error, BluetoothError, 'Failed to instantiate noble');

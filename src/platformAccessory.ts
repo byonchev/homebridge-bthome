@@ -32,7 +32,10 @@ export class BTHomeAccessory {
     type SensorKey = keyof typeof sensorData;
 
     for (const key in sensorData) {
-      this.lastKnownSensorValues.set(key, sensorData[key as SensorKey]);
+      const value = sensorData[key as SensorKey];
+      this.lastKnownSensorValues.set(key, value);
+
+      this.platform.log.debug(`Received update for ${key}: ${value}`);
     }
 
     // Support dynamic services that are not included with each payload
@@ -134,12 +137,7 @@ export class BTHomeAccessory {
       {
         dataKey: 'motionDetected',
         serviceType: this.platform.Service.MotionSensor,
-        characteristicHandlers: [
-          {
-            characteristic: this.platform.Characteristic.MotionDetected,
-            handler: this.getMotionDetected,
-          },
-        ],
+        characteristicHandlers: [],
       },
     ];
 
@@ -162,11 +160,15 @@ export class BTHomeAccessory {
   private triggerEvents() {
     const sensorData = this.getDevice().getSensorData();
 
-    if (sensorData?.button) {
+    if (sensorData?.button !== undefined) {
       this.handleButtonEvent(sensorData.button);
     }
 
-    if (sensorData?.firmwareVersion) {
+    if (sensorData?.motionDetected !== undefined) {
+      this.handleMotionEvent(sensorData.motionDetected);
+    }
+
+    if (sensorData?.firmwareVersion !== undefined) {
       this.updateFirmwareVersion(sensorData.firmwareVersion);
     }
   }
@@ -195,13 +197,8 @@ export class BTHomeAccessory {
     return this.getCharacteristicValue('illuminance', 100000);
   }
 
-  private getMotionDetected(): CharacteristicValue {
-    return this.getCharacteristicValue('motionDetected', false);
-  }
-
   private handleButtonEvent(event: ButtonEvent) {
     const service = this.accessory.getService(this.platform.Service.StatelessProgrammableSwitch);
-
     if (!service) {
       return;
     }
@@ -225,6 +222,15 @@ export class BTHomeAccessory {
     default:
       return;
     }
+  }
+
+  private handleMotionEvent(motionDetected: boolean) {
+    const service = this.accessory.getService(this.platform.Service.MotionSensor);
+    if (!service) {
+      return;
+    }
+
+    service.getCharacteristic(this.platform.Characteristic.MotionDetected).setValue(motionDetected);
   }
 
   private updateFirmwareVersion(version: string) {

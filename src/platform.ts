@@ -13,7 +13,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   public readonly accessories: Map<string, PlatformAccessory> = new Map();
   public readonly discoveredCacheUUIDs: string[] = [];
 
-  private readonly scanner : BluetoothScanner = new BluetoothScanner(BTHomeDevice.UUID);
+  private readonly scanner: BluetoothScanner = new BluetoothScanner(BTHomeDevice.UUID);
   private readonly handles: Map<string, BTHomeAccessory> = new Map();
 
   constructor(
@@ -74,7 +74,13 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     if (accessory && !this.handles.has(uuid)) {
       this.log.info('Restoring existing accessory from cache:', accessory.displayName);
 
-      accessory.context.device = new BTHomeDevice(mac, device.manufacturerData, config.encryptionKey, device.serviceData);
+      accessory.context.device = new BTHomeDevice(
+        mac,
+        device.manufacturerData,
+        this.log,
+        config.encryptionKey,
+        device.serviceData,
+      );
 
       this.handles.set(uuid, new BTHomeAccessory(this, accessory));
     }
@@ -84,7 +90,13 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.log.info('Adding new accessory:', name);
 
       accessory = new this.api.platformAccessory(name, uuid);
-      accessory.context.device = new BTHomeDevice(mac, device.manufacturerData, config.encryptionKey, device.serviceData);
+      accessory.context.device = new BTHomeDevice(
+        mac,
+        device.manufacturerData,
+        this.log,
+        config.encryptionKey,
+        device.serviceData,
+      );
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 

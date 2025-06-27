@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 import { wrapError } from '../util/errors.js';
 import { ManufacturerData } from '../bluetooth/types.js';
+import { Logger } from 'homebridge';
 
 type DecryptionResult = {
   data: Buffer,
@@ -21,10 +22,12 @@ export class BTHomeDevice {
   private readonly manufacturerData: ManufacturerData;
   private readonly encryptionKey?: Buffer;
   private readonly events : EventEmitter = new EventEmitter();
+  private readonly log: Logger;
 
   private lastSensorData?: BTHomeSensorData;
 
-  constructor(mac: string, manufacturerData : ManufacturerData, encryptionKey?: string, initialPayload?: Buffer) {
+  constructor(mac: string, manufacturerData: ManufacturerData, log: Logger, encryptionKey?: string, initialPayload?: Buffer) {
+    this.log = log;
     this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
     this.manufacturerData = manufacturerData;
     this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
@@ -117,7 +120,7 @@ export class BTHomeDevice {
         counter: counter.readUint32LE(),
       };
     } catch (error) {
-      throw wrapError(error, BTHomeDecryptionError, 'Unknown decryption error');    
+      throw wrapError(error, BTHomeDecryptionError, 'Unknown decryption error');
     }
   }
 
@@ -125,6 +128,8 @@ export class BTHomeDevice {
     const result: BTHomeSensorData = {};
 
     let offset = 0;
+
+    this.log.debug('Decoding BTHome payload: ' + data.toString('hex'));
 
     while (offset < data.length) {
       const objectId = data[offset];
@@ -188,7 +193,7 @@ export class BTHomeDevice {
 
       // Illuminance
       case 0x05:
-        result.illuminance = data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16);
+        result.illuminance = (data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16)) / 100;
         offset += 4;
         break;
 
