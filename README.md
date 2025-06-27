@@ -48,7 +48,7 @@ If you own some of the untested devices and the plugin works for you, please let
 | Shelly BLU Button        | :x:                |
 | Shelly BLU Wall Switch   | :x:                |
 | Shelly BLU RC Button     | :x:                |
-| Shelly BLU Motion        | :x:                |
+| Shelly BLU Motion        | :heavy_check_mark: |
 
 <a id="supported_features"></a>
 ### Supported Features
