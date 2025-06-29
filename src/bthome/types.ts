@@ -8,6 +8,7 @@ export type BTHomeSensorData = {
     button?: ButtonEvent,
     illuminance?: number,
     motionDetected?: boolean,
+    contactDetected?: boolean,
 };
 
 export enum ButtonEvent {

@@ -203,6 +203,14 @@ export class BTHomeDevice {
         offset += 2;
         break;
 
+      // Contact
+      case 0x1A:
+      case 0x1B:
+      case 0x2D:
+        result.contactDetected = (data.readUint8(offset + 1) === 1);
+        offset += 2;
+        break;
+
       // Not implemented
       case 0x09:
       case 0x2F:
@@ -213,8 +221,6 @@ export class BTHomeDevice {
       case 0x17:
       case 0x18:
       case 0x19:
-      case 0x1A:
-      case 0x1B:
       case 0x1C:
       case 0x0F:
       case 0x1D:
@@ -234,7 +240,6 @@ export class BTHomeDevice {
       case 0x2A:
       case 0x2B:
       case 0x2C:
-      case 0x2D:
         offset += 2;
         break;
       case 0x06:
