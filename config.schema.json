@@ -8,43 +8,113 @@
     "properties": {
       "name": {
         "title": "Plugin Name",
+        "description": "The name for this BTHome platform instance in Homebridge",
         "type": "string",
         "default": "BTHome",
         "required": true
       },
       "devices": {
         "title": "Devices",
+        "description": "List of devices to connect to and monitor",
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
             "name": {
-              "title": "Name",
-              "description": "Display name for the device",
-              "type": "string"
+              "title": "Device Name",
+              "description": "Friendly name for this device (will appear in the Home app)",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[a-zA-Z0-9\\s\\-_\\.]+$"
             },
             "mac": {
-              "title": "MAC address",
-              "description": "Bluetooth MAC address of the device",
+              "title": "MAC Address",
+              "description": "Bluetooth MAC address of the device (format: XX:XX:XX:XX:XX:XX)",
               "type": "string",
               "required": true
             },
             "encryptionKey": {
-              "title": "Encryption key",
-              "description": "The key used to encrypt the advertisment data (optional)",
+              "title": "Encryption Key",
+              "description": "32-character hex key used to encrypt the advertisment data (leave empty if device doesn't use encryption or it's disabled)",
               "type": "string",
               "required": false
+            },
+            "lowBatteryThreshold": {
+              "title": "Low Battery Alert Threshold",
+              "description": "Battery percentage below which the device will show as 'Low Battery'",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "autoDiscoverServices": {
+              "title": "Auto-Discover Services",
+              "description": "Automatically detect the services of this device based on data received.<br/><br/>Note: Event-based services (like buttons) will only appear after their first use, while sensor services (like temperature) appear immediately when data is received.",
+              "type": "boolean",
+              "default": true,
+              "required": false
+            },
+            "services": {
+              "title": "Service Configuration",
+              "description": "Manually specify which services to create for this device when auto-discovery is disabled.<br/>You should add at least one service.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "service": {
+                    "title": "Service Type",
+                    "type": "string",
+                    "oneOf": [
+                      {
+                        "title": "Temperature Sensor",
+                        "const": "temperature"
+                      },
+                      {
+                        "title": "Humidity Sensor",
+                        "const": "humidity"
+                      },
+                      {
+                        "title": "Battery",
+                        "const": "battery"
+                      },
+                      {
+                        "title": "Light Sensor",
+                        "const": "illuminance"
+                      },
+                      {
+                        "title": "Stateless Switch",
+                        "const": "button"
+                      },
+                      {
+                        "title": "Motion Sensor",
+                        "const": "motion"
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "const": "contact"
+                      }
+                    ],
+                    "required": true
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "return model.devices && model.devices[arrayIndices] && model.devices[arrayIndices].autoDiscoverServices === false;"
+              }
             }
           }
         }
       },
       "bluetooth": {
-        "title": "Bluetooth settings",
+        "title": "Bluetooth Configuration",
+        "description": "Advanced Bluetooth adapter settings",
         "type": "object",
         "properties": {
           "powerOnTimeout": {
-            "title": "Device power on timeout",
-            "description": "Maximum time (in ms) to wait for the bluetooth device to be powered on",
+            "title": "Bluetooth Power-On Timeout",
+            "description": "Maximum time (in milliseconds) to wait for the Bluetooth adapter to power on before giving up",
             "type": "integer",
             "minimum": 1000,
             "default": 10000,
