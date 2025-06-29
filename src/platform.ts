@@ -1,10 +1,11 @@
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, Service } from 'homebridge';
 
 import { BTHomeAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { BluetoothScanner } from './bluetooth/index.js';
 import { BTHomeDevice } from './bthome/index.js';
-import { BluetoothDevice } from './bluetooth/types.js';
+import { BluetoothDevice, ManufacturerData } from './bluetooth/types.js';
+import { BTHomePlatformConfig, DeviceConfig } from './config.js';
 
 export class BTHomePlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
@@ -18,7 +19,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
   constructor(
     public readonly log: Logging,
-    public readonly config: PlatformConfig,
+    public readonly config: BTHomePlatformConfig,
     public readonly api: API,
   ) {
     this.Service = api.hap.Service;
@@ -75,13 +76,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     if (accessory && !this.handles.has(uuid)) {
       this.log.info('Restoring existing accessory from cache:', accessory.displayName);
 
-      accessory.context.device = new BTHomeDevice(
-        mac,
-        device.manufacturerData,
-        this.log,
-        config.encryptionKey,
-        device.serviceData,
-      );
+      accessory.context.device = this.createDevice(mac, device.manufacturerData, config, device.serviceData);
 
       this.handles.set(uuid, new BTHomeAccessory(this, accessory));
     }
@@ -91,13 +86,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.log.info('Adding new accessory:', name);
 
       accessory = new this.api.platformAccessory(name, uuid);
-      accessory.context.device = new BTHomeDevice(
-        mac,
-        device.manufacturerData,
-        this.log,
-        config.encryptionKey,
-        device.serviceData,
-      );
+      accessory.context.device = this.createDevice(mac, device.manufacturerData, config, device.serviceData);
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
@@ -114,11 +103,11 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
   }
 
-  private getDeviceConfiguration(mac: string) {
+  private getDeviceConfiguration(mac: string): DeviceConfig | undefined {
     if (!this.config.devices) {
       this.log.warn('There are no configured BTHome devices');
 
-      return null;
+      return undefined;
     }
 
     for (const config of this.config.devices) {
@@ -127,6 +116,10 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       }
     }
 
-    return null;
+    return undefined;
+  }
+
+  private createDevice(mac: string, manufacturerData: ManufacturerData, config: DeviceConfig, payload?: Buffer): BTHomeDevice {
+    return new BTHomeDevice(mac, manufacturerData, this.log, config, payload);
   }
 }

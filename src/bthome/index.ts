@@ -5,6 +5,7 @@ import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEve
 import { wrapError } from '../util/errors.js';
 import { ManufacturerData } from '../bluetooth/types.js';
 import { Logger } from 'homebridge';
+import { DeviceConfig } from '../config.js';
 
 type DecryptionResult = {
   data: Buffer,
@@ -21,19 +22,19 @@ export class BTHomeDevice {
   private readonly mac: Buffer;
   private readonly manufacturerData: ManufacturerData;
   private readonly encryptionKey?: Buffer;
-  private readonly events : EventEmitter = new EventEmitter();
+  private readonly events: EventEmitter = new EventEmitter();
   private readonly log: Logger;
 
   private lastSensorData?: BTHomeSensorData;
 
-  constructor(mac: string, manufacturerData: ManufacturerData, log: Logger, encryptionKey?: string, initialPayload?: Buffer) {
+  constructor(mac: string, manufacturerData: ManufacturerData, log: Logger, config: DeviceConfig, payload?: Buffer) {
     this.log = log;
     this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
     this.manufacturerData = manufacturerData;
-    this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
+    this.encryptionKey = config.encryptionKey?.length ? Buffer.from(config.encryptionKey, 'hex') : undefined;
 
-    if (initialPayload) {
-      this.update(initialPayload);
+    if (payload) {
+      this.update(payload);
     }
   }
 
@@ -54,7 +55,7 @@ export class BTHomeDevice {
     this.events.on(BTHomeDevice.UPDATE_EVENT, callback);
   }
 
-  getSensorData() : BTHomeSensorData | null {
+  getSensorData(): BTHomeSensorData | null {
     if (!this.lastSensorData) {
       return null;
     }
@@ -62,11 +63,11 @@ export class BTHomeDevice {
     return Object.assign({}, this.lastSensorData);
   }
 
-  getMACAddress() : string {
+  getMACAddress(): string {
     return this.mac.toString('hex');
   }
 
-  getManufacturerData() : ManufacturerData {
+  getManufacturerData(): ManufacturerData {
     return Object.assign({}, this.manufacturerData);
   }
 
@@ -143,11 +144,11 @@ export class BTHomeDevice {
 
       // Firmware version
       case 0xF1:
-        result.firmwareVersion = `${data[offset+4]}.${data[offset+3]}.${data[offset+2]}.${data[offset+1]}`;
+        result.firmwareVersion = `${data[offset + 4]}.${data[offset + 3]}.${data[offset + 2]}.${data[offset + 1]}`;
         offset += 5;
         break;
       case 0xF2:
-        result.firmwareVersion = `${data[offset+3]}.${data[offset+2]}.${data[offset+1]}`;
+        result.firmwareVersion = `${data[offset + 3]}.${data[offset + 2]}.${data[offset + 1]}`;
         offset += 4;
         break;
 
@@ -297,8 +298,8 @@ export class BTHomeDevice {
     return result;
   }
 
-  private decodeButtonEvent(state: number) {
-    switch(state) {
+  private decodeButtonEvent(state: number) : ButtonEvent {
+    switch (state) {
     case 0x00:
       return ButtonEvent.None;
     case 0x01:
