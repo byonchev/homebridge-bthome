@@ -17,6 +17,8 @@
         "title": "Devices",
         "description": "List of devices to connect to and monitor",
         "type": "array",
+        "expandable": true,
+        "expanded": true,
         "items": {
           "type": "object",
           "properties": {
@@ -32,76 +34,103 @@
               "title": "MAC Address",
               "description": "Bluetooth MAC address of the device (format: XX:XX:XX:XX:XX:XX)",
               "type": "string",
+              "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$",
               "required": true
             },
             "encryptionKey": {
               "title": "Encryption Key",
-              "description": "32-character hex key used to encrypt the advertisment data (leave empty if device doesn't use encryption or it's disabled)",
+              "description": "32-character hex key used to encrypt the advertisment data.<br/>(leave empty if device doesn't use encryption or it's disabled)",
               "type": "string",
-              "required": false
-            },
-            "lowBatteryThreshold": {
-              "title": "Low Battery Alert Threshold",
-              "description": "Battery percentage below which the device will show as 'Low Battery'",
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 10
-            },
-            "autoDiscoverServices": {
-              "title": "Auto-Discover Services",
-              "description": "Automatically detect the services of this device based on data received.<br/><br/>Note: Event-based services (like buttons) will only appear after their first use, while sensor services (like temperature) appear immediately when data is received.",
-              "type": "boolean",
-              "default": true,
+              "pattern": "^$|^[0-9A-Fa-f]{32}$",
               "required": false
             },
             "services": {
-              "title": "Service Configuration",
-              "description": "Manually specify which services to create for this device when auto-discovery is disabled.<br/>You should add at least one service.",
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "object",
-                "properties": {
-                  "service": {
-                    "title": "Service Type",
-                    "type": "string",
-                    "oneOf": [
-                      {
-                        "title": "Temperature Sensor",
-                        "const": "temperature"
+              "type": "object",
+              "title": "Services",
+              "properties": {
+                "autoDiscovery": {
+                  "title": "Auto-Discovery",
+                  "description": "Automatically detect the services of this device based on data received.<br/>Note: Event-based services (like buttons) will only appear after their first use, while sensor services (like temperature) appear immediately when data is received.",
+                  "type": "boolean",
+                  "default": true,
+                  "required": false
+                },
+                "enabled": {
+                  "title": "Enabled Services",
+                  "description": "Manually specify which services to create for this device when auto-discovery is disabled.",
+                  "expandable": true,
+                  "expanded": true,
+                  "type": "array",
+                  "minItems": 1,
+                  "default": [
+                    {
+                      "type": "battery"
+                    }
+                  ],
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "title": "Service Type",
+                        "type": "string",
+                        "oneOf": [
+                          {
+                            "title": "Temperature Sensor",
+                            "const": "temperature"
+                          },
+                          {
+                            "title": "Humidity Sensor",
+                            "const": "humidity"
+                          },
+                          {
+                            "title": "Battery",
+                            "const": "battery"
+                          },
+                          {
+                            "title": "Light Sensor",
+                            "const": "illuminance"
+                          },
+                          {
+                            "title": "Stateless Switch",
+                            "const": "button"
+                          },
+                          {
+                            "title": "Motion Sensor",
+                            "const": "motion"
+                          },
+                          {
+                            "title": "Contact Sensor",
+                            "const": "contact"
+                          }
+                        ],
+                        "required": true
                       },
-                      {
-                        "title": "Humidity Sensor",
-                        "const": "humidity"
-                      },
-                      {
-                        "title": "Battery",
-                        "const": "battery"
-                      },
-                      {
-                        "title": "Light Sensor",
-                        "const": "illuminance"
-                      },
-                      {
-                        "title": "Stateless Switch",
-                        "const": "button"
-                      },
-                      {
-                        "title": "Motion Sensor",
-                        "const": "motion"
-                      },
-                      {
-                        "title": "Contact Sensor",
-                        "const": "contact"
+                      "options": {
+                        "type": "object",
+                        "properties": {
+                          "lowBatteryThreshold": {
+                            "title": "Low Battery Threshold",
+                            "description": "Battery percentage below which the device will show as 'Low Battery'",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 10,
+                            "widget": "updown",
+                            "condition": {
+                              "functionBody": "return model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].service === 'battery';"
+                            }
+                          }
+                        },
+                        "condition": {
+                          "functionBody": "const service = model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].service; return service === 'battery';"
+                        }
                       }
-                    ],
-                    "required": true
+                    }
+                  },
+                  "condition": {
+                    "functionBody": "return model.devices && model.devices[arrayIndices] && model.devices[arrayIndices].services && model.devices[arrayIndices].services.autoDiscovery === false;"
                   }
                 }
-              },
-              "condition": {
-                "functionBody": "return model.devices && model.devices[arrayIndices] && model.devices[arrayIndices].autoDiscoverServices === false;"
               }
             }
           }
@@ -109,7 +138,6 @@
       },
       "bluetooth": {
         "title": "Bluetooth Configuration",
-        "description": "Advanced Bluetooth adapter settings",
         "type": "object",
         "properties": {
           "powerOnTimeout": {
