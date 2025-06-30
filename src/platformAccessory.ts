@@ -3,22 +3,23 @@ import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge
 import type { BTHomePlatform } from './platform.js';
 import { BTHomeDevice } from './bthome/index.js';
 import { BTHomeSensorData, ButtonEvent } from './bthome/types.js';
+import { ServicesConfig } from './config.js';
 
 export class BTHomeAccessory {
   private static readonly LOW_BATTERY_PERCENTAGE = 20;
 
-  private readonly configuredServices : Set<typeof Service> = new Set();
-
+  private readonly configuredServices: Set<typeof Service> = new Set();
   private readonly lastKnownSensorValues = new Map();
 
   constructor(
     private readonly platform: BTHomePlatform,
     private readonly accessory: PlatformAccessory,
   ) {
-    const device : BTHomeDevice = this.getDevice();
+    const device: BTHomeDevice = this.getDevice();
     const manufacturerData = device.getManufacturerData();
 
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+    this.accessory
+      .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, manufacturerData.manufacturer || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
@@ -173,23 +174,37 @@ export class BTHomeAccessory {
     }
   }
 
-  private getDevice() : BTHomeDevice {
-    return this.accessory.context.device;
+  private getDevice(): BTHomeDevice {
+    const device = this.accessory.context.device;
+    if (!device) {
+      throw new Error('BTHome device is not set in the accessory context');
+    }
+
+    return device;
   }
 
-  private getTemperature() : CharacteristicValue {
+  private getServiceConfiguration(): ServicesConfig {
+    const config = this.accessory.context.services;
+    if (!config) {
+      throw new Error('Accessory service configuration is not set in the context');
+    }
+
+    return config;
+  }
+
+  private getTemperature(): CharacteristicValue {
     return this.getCharacteristicValue('temperature', -270);
   }
 
-  private getHumidity() : CharacteristicValue {
+  private getHumidity(): CharacteristicValue {
     return this.getCharacteristicValue('humidity', 0);
   }
 
-  private getBatteryLevel() : CharacteristicValue {
+  private getBatteryLevel(): CharacteristicValue {
     return this.getCharacteristicValue('battery', 100);
   }
 
-  private getLowBatteryStatus() : CharacteristicValue {
+  private getLowBatteryStatus(): CharacteristicValue {
     return this.getCharacteristicValue('battery', 100) < BTHomeAccessory.LOW_BATTERY_PERCENTAGE;
   }
 
@@ -206,21 +221,21 @@ export class BTHomeAccessory {
     const characteristic = service.getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent);
 
     switch (event) {
-    case ButtonEvent.SinglePress:
-      characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
-      break;
-    case ButtonEvent.DoublePress:
-    case ButtonEvent.TriplePress:
-      characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS);
-      break;
-    case ButtonEvent.LongPress:
-    case ButtonEvent.LongDoublePress:
-    case ButtonEvent.LongTriplePress:
-    case ButtonEvent.HoldPress:
-      characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.LONG_PRESS);
-      break;
-    default:
-      return;
+      case ButtonEvent.SinglePress:
+        characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+        break;
+      case ButtonEvent.DoublePress:
+      case ButtonEvent.TriplePress:
+        characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.DOUBLE_PRESS);
+        break;
+      case ButtonEvent.LongPress:
+      case ButtonEvent.LongDoublePress:
+      case ButtonEvent.LongTriplePress:
+      case ButtonEvent.HoldPress:
+        characteristic.setValue(this.platform.Characteristic.ProgrammableSwitchEvent.LONG_PRESS);
+        break;
+      default:
+        return;
     }
   }
 
