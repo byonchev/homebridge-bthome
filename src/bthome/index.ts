@@ -24,7 +24,7 @@ export class BTHomeDevice {
   private readonly events: EventEmitter = new EventEmitter();
   private readonly log: Logger;
 
-  private lastSensorData?: BTHomeSensorData;
+  private lastPayload?: BTHomeSensorData;
 
   constructor(mac: string, manufacturerData: ManufacturerData, log: Logger, encryptionKey?: string, payload?: Buffer) {
     this.log = log;
@@ -38,16 +38,16 @@ export class BTHomeDevice {
   }
 
   update(payload: Buffer) {
-    const newSensorData = this.decodePayload(payload);
+    const newPayload = this.decodePayload(payload);
 
     // Deduplicate repeated events if id is present
-    if (this.lastSensorData?.id && this.lastSensorData.id === newSensorData.id) {
+    if (this.lastPayload?.id && this.lastPayload.id === newPayload.id) {
       return;
     }
 
-    this.lastSensorData = newSensorData;
+    this.lastPayload = newPayload;
 
-    this.events.emit(BTHomeDevice.UPDATE_EVENT, newSensorData);
+    this.events.emit(BTHomeDevice.UPDATE_EVENT, newPayload);
   }
 
   onUpdate(callback: (data: BTHomeSensorData) => void) {
@@ -55,11 +55,11 @@ export class BTHomeDevice {
   }
 
   getSensorData(): BTHomeSensorData | null {
-    if (!this.lastSensorData) {
+    if (!this.lastPayload) {
       return null;
     }
 
-    return Object.assign({}, this.lastSensorData);
+    return Object.assign({}, this.lastPayload);
   }
 
   getAddress(separator: string = ':'): string {
@@ -103,7 +103,7 @@ export class BTHomeDevice {
     const counter = payload.subarray(-8, -4);
     const mic = payload.subarray(-4);
 
-    const previousCounterValue = this.lastSensorData?.counter || -1;
+    const previousCounterValue = this.lastPayload?.counter || -1;
     const newCounterValue = counter.readUint32LE();
 
     if (previousCounterValue < BTHomeDevice.MAX_COUNTER_VALUE && newCounterValue < previousCounterValue) {

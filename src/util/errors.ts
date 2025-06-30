@@ -1,6 +1,6 @@
 type WrappedConstructor = new (message?: string) => Error;
 
-export function wrapError<E extends WrappedConstructor>(original: unknown, errorType: E, fallback: string): Error {
+export const wrapError = <E extends WrappedConstructor>(original: unknown, errorType: E, fallback: string): Error => {
   let message = fallback;
   let stack: string | undefined;
 
@@ -16,4 +16,4 @@ export function wrapError<E extends WrappedConstructor>(original: unknown, error
   }
 
   return result;
-}
+};
