@@ -1,6 +1,6 @@
 import { ManufacturerData } from './types';
 
-function decodeModelName(identifier: number): string | undefined {
+const decodeModelName = (identifier: number): string | undefined => {
   switch (identifier) {
     case 0x0001:
       return 'SBBT-002C';
@@ -17,9 +17,9 @@ function decodeModelName(identifier: number): string | undefined {
     case 0x0008:
       return 'SBTR-001AEU';
   }
-}
+};
 
-export function decodeShellyManufacturerData(data: Buffer): ManufacturerData {
+export const decodeShellyManufacturerData = (data: Buffer): ManufacturerData => {
   const result: ManufacturerData = { manufacturer: 'Shelly' };
 
   let offset = 2;
@@ -47,4 +47,4 @@ export function decodeShellyManufacturerData(data: Buffer): ManufacturerData {
   }
 
   return result;
-}
+};

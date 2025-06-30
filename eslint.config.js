@@ -17,6 +17,7 @@ export default tseslint.config(
       'dot-notation': 'error',
       'prefer-arrow-callback': 'warn',
       'no-use-before-define': 'off',
+      'func-style': ['error', 'expression'],
       '@typescript-eslint/no-use-before-define': ['error', { classes: false, enums: false }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'prettier/prettier': 'error',
