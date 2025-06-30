@@ -28,10 +28,9 @@ export class BluetoothScanner {
         const { default: BluetoothHciSocket } = await import('@stoprocent/bluetooth-hci-socket');
 
         const socket = new BluetoothHciSocket();
-        const device = process.env.NOBLE_HCI_DEVICE_ID ? Number.parseInt(process.env.NOBLE_HCI_DEVICE_ID, 10) : undefined;
 
-        // @ts-expect-error parameter is not used and can be undefined, but there's a wrong typescript definition in library
-        socket.bindRaw(device);
+        // @ts-expect-error parameter is not used and can be undefined, but there's a strict expectation in library
+        socket.bindRaw(undefined);
       }
 
       const module = await import('@stoprocent/noble');

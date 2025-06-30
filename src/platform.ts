@@ -120,7 +120,14 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   }
 
   private setAccessoryContext(accessory: PlatformAccessory, config: DeviceConfig, device: BluetoothDevice) {
-    accessory.context.device = new BTHomeDevice(device.mac, device.manufacturerData, this.log, config.encryptionKey, device.serviceData);
+    accessory.context.device = new BTHomeDevice(
+      device.mac,
+      device.manufacturerData,
+      this.log,
+      config.encryptionKey,
+      device.serviceData,
+    );
+
     accessory.context.services = config.services || { autoDiscovery: true };
   }
 }
