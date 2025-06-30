@@ -4,6 +4,7 @@ export type ServiceType = 'temperature' | 'humidity' | 'battery' | 'illuminance'
 
 export interface ServiceOptions {
   lowBatteryThreshold?: number;
+  position?: number;
 }
 
 export interface ServiceConfig {
