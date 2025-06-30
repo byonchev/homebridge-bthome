@@ -62,8 +62,10 @@ export class BTHomeDevice {
     return Object.assign({}, this.lastSensorData);
   }
 
-  getMACAddress(): string {
-    return this.mac.toString('hex');
+  getAddress(separator: string = ':'): string {
+    const mac = this.mac.toString('hex');
+
+    return mac.match(/.{1,2}/g)?.join(separator) || mac;
   }
 
   getManufacturerData(): ManufacturerData {
@@ -129,7 +131,7 @@ export class BTHomeDevice {
 
     let offset = 0;
 
-    this.log.debug('Decoding BTHome payload: ' + data.toString('hex'));
+    this.log.debug(`[${this.getAddress()}] Decoding BTHome payload: ${data.toString('hex')}`);
 
     while (offset < data.length) {
       const objectId = data[offset];

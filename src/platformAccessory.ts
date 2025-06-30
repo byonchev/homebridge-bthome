@@ -8,6 +8,7 @@ import { ServicesConfig } from './config.js';
 export class BTHomeAccessory {
   private static readonly LOW_BATTERY_PERCENTAGE = 20;
 
+  private readonly device: BTHomeDevice;
   private readonly configuredServices: Set<typeof Service> = new Set();
   private readonly lastKnownSensorValues = new Map();
 
@@ -15,8 +16,9 @@ export class BTHomeAccessory {
     private readonly platform: BTHomePlatform,
     private readonly accessory: PlatformAccessory,
   ) {
-    const device: BTHomeDevice = this.getDevice();
-    const manufacturerData = device.getManufacturerData();
+    this.device = this.getDevice();
+
+    const manufacturerData = this.device.getManufacturerData();
 
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
@@ -26,7 +28,7 @@ export class BTHomeAccessory {
 
     this.setupServices();
 
-    device.onUpdate(this.onDeviceUpdate.bind(this));
+    this.device.onUpdate(this.onDeviceUpdate.bind(this));
   }
 
   private onDeviceUpdate(sensorData: BTHomeSensorData) {
@@ -36,7 +38,7 @@ export class BTHomeAccessory {
       const value = sensorData[key as SensorKey];
       this.lastKnownSensorValues.set(key, value);
 
-      this.platform.log.debug(`Received update for ${key}: ${value}`);
+      this.platform.log.debug(`[${this.device.getAddress()}] Received update for ${key}: ${value}`);
     }
 
     // Support dynamic services that are not included with each payload
