@@ -75,7 +75,7 @@ export class BluetoothScanner {
   private onDiscoverInternal(peripheral: Peripheral) {
     const advertisementData = peripheral.advertisement;
     const services = advertisementData.serviceData || [];
-    const service = services.find((service) => service.uuid.toLowerCase() === this.serviceUuid);
+    const service = services.find(service => service.uuid.toLowerCase() === this.serviceUuid);
 
     if (!service) {
       return;
@@ -90,7 +90,7 @@ export class BluetoothScanner {
       manufacturerData.serialNumber = mac;
     }
 
-    const device : BluetoothDevice = { name, mac, serviceData, manufacturerData };
+    const device: BluetoothDevice = { name, mac, serviceData, manufacturerData };
 
     this.events.emit(BluetoothScanner.DISCOVER_EVENT, device);
   }
@@ -99,18 +99,18 @@ export class BluetoothScanner {
     return 'BLE ' + mac.replaceAll(':', '').slice(6).toUpperCase();
   }
 
-  private decodeManufacturerData(data? : Buffer) : ManufacturerData {
+  private decodeManufacturerData(data?: Buffer): ManufacturerData {
     if (!data) {
       return {};
     }
 
     const companyIdentifier = data.readUInt16LE(0);
 
-    switch(companyIdentifier) {
-    case 0x0BA9:
-      return decodeShellyManufacturerData(data);
-    default:
-      return {};
+    switch (companyIdentifier) {
+      case 0x0ba9:
+        return decodeShellyManufacturerData(data);
+      default:
+        return {};
     }
   }
 }
