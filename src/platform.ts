@@ -38,7 +38,21 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
-    this.accessories.set(accessory.UUID, accessory);
+    const devices = this.config.devices || [];
+
+    for (const device of devices) {
+      const deviceUUID = this.generateUUID(device.mac);
+
+      if (deviceUUID !== accessory.UUID) {
+        continue;
+      }
+
+      this.setAccessoryContext(accessory, device, accessory.context.device);
+      return;
+    }
+
+    this.log.info('Removing stale accessory:', accessory.displayName);
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
   }
 
   async discoverDevices() {
@@ -69,7 +83,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    const uuid = this.api.hap.uuid.generate(mac);
+    const uuid = this.generateUUID(mac);
 
     let accessory = this.accessories.get(uuid);
 
@@ -82,10 +96,16 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     }
 
     if (!accessory) {
-      const name = config.name || device.name;
+      const name = (config.name || device.name).replace(/[^a-zA-Z0-9\s']/g, '');
+
       this.log.info('Adding new accessory:', name);
 
-      accessory = new this.api.platformAccessory(name, uuid);
+      try {
+        accessory = new this.api.platformAccessory(name, uuid);
+      } catch (error) {
+        this.log.error('Failed to create accessory:', error);
+        return;
+      }
 
       this.setAccessoryContext(accessory, config, device);
 
@@ -129,5 +149,9 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     );
 
     accessory.context.services = config.services || { autoDiscovery: true };
+  }
+
+  private generateUUID(mac: string): string {
+    return this.api.hap.uuid.generate(mac);
   }
 }

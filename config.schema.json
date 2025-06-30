@@ -28,7 +28,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 64,
-              "pattern": "^[a-zA-Z0-9\\s\\-_\\.]+$"
+              "pattern": "^[a-zA-Z0-9\\s']+$"
             },
             "mac": {
               "title": "MAC Address",
