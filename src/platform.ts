@@ -12,7 +12,8 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   public readonly Characteristic: typeof Characteristic;
 
   public readonly accessories: Map<string, PlatformAccessory> = new Map();
-  public readonly discoveredCacheUUIDs: string[] = [];
+
+  private readonly staleAccessories: PlatformAccessory[] = [];
 
   private readonly scanner: BluetoothScanner;
   private readonly handles: Map<string, BTHomeAccessory> = new Map();
@@ -31,6 +32,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
 
+      this.removeStaleAccessories();
       this.discoverDevices();
     });
   }
@@ -38,21 +40,30 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
-    const devices = this.config.devices || [];
+    let mac = accessory.context.mac;
 
-    for (const device of devices) {
-      const deviceUUID = this.generateUUID(device.mac);
+    if (!mac && accessory.context.device?.mac) {
+      mac = Buffer.from(accessory.context.device.mac.data).toString('hex');
+    }
 
-      if (deviceUUID !== accessory.UUID) {
-        continue;
-      }
+    const config = this.getDeviceConfiguration(mac || '');
+    if (!config) {
+      this.staleAccessories.push(accessory);
+    }
 
-      this.setAccessoryContext(accessory, device, accessory.context.device);
+    this.accessories.set(accessory.UUID, accessory);
+  }
+
+  removeStaleAccessories() {
+    if (this.staleAccessories.length === 0) {
       return;
     }
 
-    this.log.info('Removing stale accessory:', accessory.displayName);
-    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    this.staleAccessories.forEach(accessory => {
+      this.log.info('Removing stale accessory:', accessory.displayName);
+      this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      this.accessories.delete(accessory.UUID);
+    });
   }
 
   async discoverDevices() {
@@ -111,7 +122,6 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
-      this.discoveredCacheUUIDs.push(uuid);
       this.handles.set(uuid, new BTHomeAccessory(this, accessory));
       this.accessories.set(accessory.UUID, accessory);
     }
@@ -131,7 +141,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     }
 
     for (const config of this.config.devices) {
-      if (config.mac.toLowerCase() === mac.toLowerCase()) {
+      if (config.mac.replaceAll(':', '').toLowerCase() === mac.replaceAll(':', '').toLowerCase()) {
         return config;
       }
     }
@@ -140,6 +150,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   }
 
   private setAccessoryContext(accessory: PlatformAccessory, config: DeviceConfig, device: BluetoothDevice) {
+    accessory.context.mac = device.mac;
     accessory.context.device = new BTHomeDevice(
       device.mac,
       device.manufacturerData,
