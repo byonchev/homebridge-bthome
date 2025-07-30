@@ -39,6 +39,7 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 - Push Button
 - Illuminance
 - Motion detection
+- Contact detection
 
 ### Supported devices
 This is a list of devices that should work with this plugin. Some of them aren't tested (see table below).
@@ -52,6 +53,7 @@ If you own some of the untested devices and the plugin works for you, please let
 | Shelly BLU Wall Switch   | :x:                |
 | Shelly BLU RC Button     | :x:                |
 | Shelly BLU Motion        | :heavy_check_mark: |
+| Shelly BLU Door/Window   | :x:                |
 
 <a id="supported_features"></a>
 ### Supported Features
@@ -59,13 +61,11 @@ If you own some of the untested devices and the plugin works for you, please let
 | Feature                               | Support Status     |
 | ------------------------------------- | ------------------ |
 | Encryption                            | :heavy_check_mark: |
-| Occasional Sensor Data*               | :heavy_check_mark: |
-| Multiple Bluetooth Devices**          | :x:                |
+| Multiple Bluetooth Devices*           | :x:                |
 | Multiple Sensor Readings of Same Type | :x:                |
 
 #### Notes:
-- *\*Occasional Sensor Data:* This refers to data not consistently present in the device payload. For instance, the Shelly BLU H&T device only reports its push button state when the button is pressed; this data is absent in periodic updates.
-- *\*\*Multiple Bluetooth Devices:* If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
+- *\*Multiple Bluetooth Devices:* If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
 
 ### Contributing
 
