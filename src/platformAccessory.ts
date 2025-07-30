@@ -52,7 +52,7 @@ export class BTHomeAccessory {
 
     const key = sensorType as SensorKey;
 
-    if (!sensorData || !sensorData[key]) {
+    if (!sensorData || !(key in sensorData)) {
       return null;
     }
 
@@ -62,7 +62,7 @@ export class BTHomeAccessory {
   private getCharacteristicValue(sensorType: string, fallback: CharacteristicValue) {
     const value = this.getSensorData(sensorType);
 
-    if (value) {
+    if (value !== null && value !== undefined) {
       return value;
     }
 
