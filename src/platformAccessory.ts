@@ -11,17 +11,11 @@ export class BTHomeAccessory {
 
   private readonly services: ServiceManager;
 
-  // private readonly configuredServices: Set<typeof Service> = new Set();
-  // private readonly lastKnownSensorValues = new Map();
-  // private readonly serviceConfiguration: ServicesConfig;
-
   constructor(
     private readonly platform: BTHomePlatform,
     private readonly accessory: PlatformAccessory,
   ) {
     this.device = this.getDevice();
-    this.services = new ServiceManager(this.accessory, platform.log, this.getServiceConfiguration());
-
     const manufacturerData = this.device.getManufacturerData();
 
     this.accessory
@@ -30,6 +24,8 @@ export class BTHomeAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
+    this.services = new ServiceManager(this.accessory, platform.log, this.getServiceConfiguration());
+
     this.device.onUpdate(this.onDeviceUpdate.bind(this));
   }
 
@@ -37,14 +33,9 @@ export class BTHomeAccessory {
     try {
       this.services.update(sensorData);
     } catch (error) {
-      this.platform.log.error(`Error updating services for device ${this.accessory.displayName}:`, error);
+      this.platform.log.error(`[${this.accessory.displayName}] Error updating services for device:`, error);
     }
   }
-
-  //   if (sensorData?.firmwareVersion !== undefined) {
-  //     this.updateFirmwareVersion(sensorData.firmwareVersion);
-  //   }
-  // }
 
   private getDevice(): BTHomeDevice {
     const device = this.accessory.context.device;
@@ -63,15 +54,4 @@ export class BTHomeAccessory {
 
     return config;
   }
-
-  // private updateFirmwareVersion(version: string) {
-  //   const service = this.accessory.getService(this.platform.Service.AccessoryInformation);
-  //   if (!service) {
-  //     return;
-  //   }
-
-  //   service.setCharacteristic(this.platform.Characteristic.FirmwareRevision, version);
-  // }
-
-  /* Characteristics related code end here */
 }

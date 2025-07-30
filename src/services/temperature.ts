@@ -11,7 +11,7 @@ export class TemperatureHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.temperature !== undefined) {
       this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(sensorData.temperature);
     }

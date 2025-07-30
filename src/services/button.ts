@@ -11,7 +11,7 @@ export class ButtonHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     const buttonEvent = this.mapButtonEvent(sensorData.button);
 
     if (buttonEvent !== null) {
@@ -19,7 +19,7 @@ export class ButtonHandler {
     }
   }
 
-  mapButtonEvent(event?: ButtonEvent): CharacteristicValue | null {
+  private mapButtonEvent(event?: ButtonEvent): CharacteristicValue | null {
     switch (event) {
       case ButtonEvent.SinglePress:
         return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS;

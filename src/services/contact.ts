@@ -11,7 +11,7 @@ export class ContactHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.contactDetected !== undefined) {
       const state = this.mapState(sensorData.contactDetected);
 
@@ -19,7 +19,7 @@ export class ContactHandler {
     }
   }
 
-  mapState(contactDetected: boolean): CharacteristicValue {
+  private mapState(contactDetected: boolean): CharacteristicValue {
     if (contactDetected) {
       return Characteristic.ContactSensorState.CONTACT_DETECTED;
     } else {

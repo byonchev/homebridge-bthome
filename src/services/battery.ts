@@ -11,7 +11,7 @@ export class BatteryHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.battery !== undefined) {
       this.service.getCharacteristic(Characteristic.BatteryLevel).updateValue(sensorData.battery);
 

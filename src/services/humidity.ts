@@ -11,7 +11,7 @@ export class HumidityHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.humidity !== undefined) {
       this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(sensorData.humidity);
     }

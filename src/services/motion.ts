@@ -11,7 +11,7 @@ export class MotionHandler {
     this.options = options;
   }
 
-  updateValues(sensorData: BTHomeSensorData) {
+  public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.motionDetected !== undefined) {
       this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(sensorData.motionDetected);
     }

@@ -9,6 +9,7 @@ import { IlluminanceHandler } from './illuminance.js';
 import { ButtonHandler } from './button.js';
 import { MotionHandler } from './motion.js';
 import { ContactHandler } from './contact.js';
+import { InformationHandler } from './information.js';
 
 type ServiceClass = WithUUID<typeof Service>;
 
@@ -25,6 +26,11 @@ interface ServiceDefinition {
 }
 
 const SERVICE_DEFINITIONS: Record<ServiceType, ServiceDefinition> = {
+  information: {
+    class: Service.AccessoryInformation,
+    type: 'information',
+    handler: InformationHandler,
+  },
   temperature: {
     class: Service.TemperatureSensor,
     type: 'temperature',
@@ -89,6 +95,8 @@ export class ServiceManager {
   }
 
   private discoverServices(sensorData: BTHomeSensorData) {
+    this.configureService({ type: 'information' });
+
     if (sensorData.temperature !== undefined) {
       this.configureService({ type: 'temperature' });
     }
@@ -119,9 +127,9 @@ export class ServiceManager {
   }
 
   private configureServices(configs: ServiceConfig[]) {
-    const existingServices = this.accessory.services.filter(
-      service => !(service instanceof Service.AccessoryInformation),
-    );
+    const existingServices = [...this.accessory.services];
+
+    configs.push({ type: 'information' });
 
     configs.forEach(config => {
       const service = this.configureService(config);
