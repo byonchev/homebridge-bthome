@@ -13,7 +13,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   public readonly accessories: Map<string, PlatformAccessory> = new Map();
   public readonly discoveredCacheUUIDs: string[] = [];
 
-  private readonly scanner: BluetoothScanner = new BluetoothScanner(BTHomeDevice.UUID);
+  private readonly scanner: BluetoothScanner;
   private readonly handles: Map<string, BTHomeAccessory> = new Map();
 
   constructor(
@@ -23,6 +23,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+    this.scanner = new BluetoothScanner(BTHomeDevice.UUID, log);
 
     this.log.debug('Finished initializing platform:', this.config.platform);
 

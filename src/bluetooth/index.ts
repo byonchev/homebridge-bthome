@@ -4,17 +4,22 @@ import { EventEmitter } from 'events';
 import { BluetoothDevice, ManufacturerData, BluetoothError } from './types.js';
 import { wrapError } from '../util/errors.js';
 import { decodeShellyManufacturerData } from './shelly.js';
+import { Logger } from 'homebridge';
+import { withTimeout } from '../util/timeout.js';
 
 export class BluetoothScanner {
   private static readonly DISCOVER_EVENT = 'discover';
+  private static readonly DEFAULT_TIMEOUT = 60000;
 
   private readonly serviceUuid: string;
   private readonly events: EventEmitter = new EventEmitter();
+  private readonly log: Logger;
 
   private started: boolean = false;
 
-  constructor(serviceUuid: string) {
+  constructor(serviceUuid: string, log: Logger) {
     this.serviceUuid = serviceUuid.toLocaleLowerCase();
+    this.log = log;
   }
 
   async getNobleInstance() {
@@ -37,24 +42,30 @@ export class BluetoothScanner {
     }
   }
 
-  async start(timeout? : number) {
+  async start(timeout : number = BluetoothScanner.DEFAULT_TIMEOUT) {
     if (this.started) {
       return;
     }
 
-    const noble = await this.getNobleInstance();
+    return withTimeout(async () => {
+      const noble = await this.getNobleInstance();
+      this.log.debug('Loaded noble instance');
 
-    try {
-      await noble.waitForPoweredOn(timeout);
+      try {
+        await noble.waitForPoweredOn(timeout);
+        this.log.debug('Bluetooth device powered on');
 
-      noble.on('discover', this.onDiscoverInternal.bind(this));
+        noble.on('discover', this.onDiscoverInternal.bind(this));
 
-      await noble.startScanningAsync([this.serviceUuid], true);
+        await noble.startScanningAsync([this.serviceUuid], true);
+        this.log.debug(`Started scanning for devices with service uuid: ${this.serviceUuid}`);
 
-      this.started = true;
-    } catch (error) {
-      throw wrapError(error, BluetoothError, 'Unknown bluetooth error');
-    }
+        this.started = true;
+      } catch (error) {
+        throw wrapError(error, BluetoothError, 'Unknown bluetooth error');
+      }
+    },
+    timeout, new BluetoothError('Bluetooth scanner initialization timeout'));
   }
 
   onDiscover(callback: (device: BluetoothDevice) => void) {
