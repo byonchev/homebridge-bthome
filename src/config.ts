@@ -1,6 +1,14 @@
 import type { PlatformConfig } from 'homebridge';
 
-export type ServiceType = 'temperature' | 'humidity' | 'battery' | 'illuminance' | 'button' | 'motion' | 'contact';
+export type ServiceType =
+  | 'information'
+  | 'temperature'
+  | 'humidity'
+  | 'battery'
+  | 'illuminance'
+  | 'button'
+  | 'motion'
+  | 'contact';
 
 export interface ServiceOptions {
   lowBatteryThreshold?: number;

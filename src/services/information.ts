@@ -2,7 +2,7 @@ import { Characteristic, Service } from 'hap-nodejs';
 import { BTHomeSensorData } from '../bthome/types.js';
 import { ServiceOptions } from '../config.js';
 
-export class IlluminanceHandler {
+export class InformationHandler {
   private readonly service: Service;
   private readonly options?: ServiceOptions;
 
@@ -12,8 +12,8 @@ export class IlluminanceHandler {
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
-    if (sensorData.illuminance !== undefined) {
-      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(sensorData.illuminance);
+    if (sensorData.firmwareVersion !== undefined) {
+      this.service.getCharacteristic(Characteristic.FirmwareRevision).updateValue(sensorData.firmwareVersion);
     }
   }
 }
