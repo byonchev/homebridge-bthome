@@ -1,8 +1,14 @@
 import { Service, WithUUID } from 'hap-nodejs';
-import { PlatformAccessory } from 'homebridge';
+import { Logger, PlatformAccessory } from 'homebridge';
 import { ServiceConfig, ServiceOptions, ServicesConfig, ServiceType } from '../config.js';
 import { BTHomeSensorData } from '../bthome/types.js';
 import { TemperatureHandler } from './temperature.js';
+import { HumidityHandler } from './humidity.js';
+import { BatteryHandler } from './battery.js';
+import { IlluminanceHandler } from './illuminance.js';
+import { ButtonHandler } from './button.js';
+import { MotionHandler } from './motion.js';
+import { ContactHandler } from './contact.js';
 
 type ServiceClass = WithUUID<typeof Service>;
 
@@ -18,14 +24,54 @@ interface ServiceDefinition {
   handler: ServiceHandlerConstructor;
 }
 
+const SERVICE_DEFINITIONS: Record<ServiceType, ServiceDefinition> = {
+  temperature: {
+    class: Service.TemperatureSensor,
+    type: 'temperature',
+    handler: TemperatureHandler,
+  },
+  humidity: {
+    class: Service.HumiditySensor,
+    type: 'humidity',
+    handler: HumidityHandler,
+  },
+  battery: {
+    class: Service.Battery,
+    type: 'battery',
+    handler: BatteryHandler,
+  },
+  illuminance: {
+    class: Service.LightSensor,
+    type: 'illuminance',
+    handler: IlluminanceHandler,
+  },
+  button: {
+    class: Service.StatelessProgrammableSwitch,
+    type: 'button',
+    handler: ButtonHandler,
+  },
+  motion: {
+    class: Service.MotionSensor,
+    type: 'motion',
+    handler: MotionHandler,
+  },
+  contact: {
+    class: Service.ContactSensor,
+    type: 'contact',
+    handler: ContactHandler,
+  },
+};
+
 export class ServiceManager {
   private readonly accessory: PlatformAccessory;
   private readonly autoDiscovery: boolean;
   private readonly handlers: Map<string, ServiceHandler> = new Map();
+  private readonly log: Logger;
 
-  constructor(accessory: PlatformAccessory, config?: ServicesConfig) {
+  constructor(accessory: PlatformAccessory, logger: Logger, config?: ServicesConfig) {
     this.accessory = accessory;
     this.autoDiscovery = config?.autoDiscovery !== false;
+    this.log = logger;
 
     if (!this.autoDiscovery) {
       this.configureServices(config?.enabled || []);
@@ -47,34 +93,50 @@ export class ServiceManager {
       this.configureService({ type: 'temperature' });
     }
 
-    // if (sensorData.humidity !== undefined) {
-    //   this.configureService({ type: 'humidity' });
-    // }
+    if (sensorData.humidity !== undefined) {
+      this.configureService({ type: 'humidity' });
+    }
 
-    // if (sensorData.battery !== undefined) {
-    //   this.configureService({ type: 'battery', options: { lowBatteryThreshold: 10 } });
-    // }
+    if (sensorData.battery !== undefined) {
+      this.configureService({ type: 'battery', options: { lowBatteryThreshold: 10 } });
+    }
 
-    // if (sensorData.illuminance !== undefined) {
-    //   this.configureService({ type: 'illuminance' });
-    // }
+    if (sensorData.illuminance !== undefined) {
+      this.configureService({ type: 'illuminance' });
+    }
 
-    // if (sensorData.button !== undefined) {
-    //   this.configureService({ type: 'button' });
-    // }
+    if (sensorData.button !== undefined) {
+      this.configureService({ type: 'button' });
+    }
 
-    // if (sensorData.motionDetected !== undefined) {
-    //   this.configureService({ type: 'motion' });
-    // }
+    if (sensorData.motionDetected !== undefined) {
+      this.configureService({ type: 'motion' });
+    }
 
-    // if (sensorData.contactDetected !== undefined) {
-    //   this.configureService({ type: 'contact' });
-    // }
+    if (sensorData.contactDetected !== undefined) {
+      this.configureService({ type: 'contact' });
+    }
   }
 
   private configureServices(configs: ServiceConfig[]) {
+    const existingServices = this.accessory.services.filter(
+      service => !(service instanceof Service.AccessoryInformation),
+    );
+
     configs.forEach(config => {
-      this.configureService(config);
+      const service = this.configureService(config);
+
+      const serviceIndex = existingServices.findIndex(existingService => existingService === service);
+
+      if (serviceIndex !== -1) {
+        existingServices.splice(serviceIndex, 1);
+      }
+    });
+
+    existingServices.forEach(staleService => {
+      this.log.warn(`[${this.accessory.displayName}] Removing stale service: ${staleService.constructor.name}`);
+
+      this.accessory.removeService(staleService);
     });
   }
 
@@ -85,54 +147,43 @@ export class ServiceManager {
       throw new Error(`No service definition found for type: ${config.type}`);
     }
 
+    this.log.debug(
+      `[${this.accessory.displayName}] Configuring ${serviceDefinition.class.name} with options:`,
+      config.options || {},
+    );
+
     const service = this.upsertService(serviceDefinition.class, config.options?.position);
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
       this.handlers.set(handlerKey, new serviceDefinition.handler(service, config.options));
     }
+
+    return service;
   }
 
   private upsertService(serviceClass: ServiceClass, position: number = 1): Service {
-    const subType = `${serviceClass.name}_${position}`;
+    const subType = this.getServiceSubType(serviceClass, position);
+    const name = this.accessory.displayName;
 
-    return (
-      this.accessory.getServiceById(serviceClass, subType) ||
-      this.accessory.getService(serviceClass) ||
-      this.accessory.addService(serviceClass, this.accessory.displayName, subType)
-    );
+    return this.getService(serviceClass, position) || this.accessory.addService(serviceClass, name, subType);
+  }
+
+  private getService(serviceClass: ServiceClass, position: number = 1): Service | undefined {
+    const subType = this.getServiceSubType(serviceClass, position);
+
+    return this.accessory.getServiceById(serviceClass, subType) || this.accessory.getService(serviceClass);
   }
 
   private getServiceDefinition(serviceType: ServiceType): ServiceDefinition | undefined {
-    const result = { type: serviceType } as ServiceDefinition;
-
-    switch (serviceType) {
-      case 'temperature':
-        result.class = Service.TemperatureSensor;
-        result.handler = TemperatureHandler;
-        break;
-      // case 'humidity':
-      //   result.class = Service.HumiditySensor;
-      //   break;
-      // case 'battery':
-      //   result.class = Service.Battery;
-      //   break;
-      // case 'illuminance':
-      //   result.class = Service.LightSensor;
-      //   break;
-      // case 'button':
-      //   result.class = Service.StatelessProgrammableSwitch;
-      //   break;
-      // case 'motion':
-      //   result.class = Service.MotionSensor;
-      //   break;
-      // case 'contact':
-      //   result.class = Service.ContactSensor;
-      //   break;
-      default:
-        throw new Error(`Unsupported service type: ${serviceType}`);
+    if (SERVICE_DEFINITIONS[serviceType]) {
+      return SERVICE_DEFINITIONS[serviceType];
     }
 
-    return result;
+    return undefined;
+  }
+
+  private getServiceSubType(serviceClass: ServiceClass, position: number = 1): string {
+    return `${serviceClass.name}_${position}`;
   }
 }

@@ -114,15 +114,15 @@
                             "type": "integer",
                             "minimum": 1,
                             "maximum": 100,
-                            "default": 10,
                             "widget": "updown",
                             "condition": {
-                              "functionBody": "return model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].service === 'battery';"
-                            }
+                              "functionBody": "return model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].type === 'battery';"
+                            },
+                            "required": false
                           }
                         },
                         "condition": {
-                          "functionBody": "const service = model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].service; return service === 'battery';"
+                          "functionBody": "const service = model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].type; return service === 'battery';"
                         }
                       }
                     }
