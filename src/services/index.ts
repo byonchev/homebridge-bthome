@@ -1,6 +1,6 @@
-import { Service, WithUUID } from 'hap-nodejs';
+import { API, Service } from 'homebridge';
 import { Logger, PlatformAccessory } from 'homebridge';
-import { ServiceConfig, ServiceOptions, ServicesConfig, ServiceType } from '../config.js';
+import { ServiceConfig, ServicesConfig, ServiceType } from '../config.js';
 import { BTHomeSensorData } from '../bthome/types.js';
 import { TemperatureHandler } from './temperature.js';
 import { HumidityHandler } from './humidity.js';
@@ -10,78 +10,75 @@ import { ButtonHandler } from './button.js';
 import { MotionHandler } from './motion.js';
 import { ContactHandler } from './contact.js';
 import { InformationHandler } from './information.js';
-
-type ServiceClass = WithUUID<typeof Service>;
-
-interface ServiceHandler {
-  updateValues: (sensorData: BTHomeSensorData) => void;
-}
-
-type ServiceHandlerConstructor = new (service: Service, options?: ServiceOptions) => ServiceHandler;
-
-interface ServiceDefinition {
-  class: ServiceClass;
-  type: ServiceType;
-  handler: ServiceHandlerConstructor;
-}
-
-const SERVICE_DEFINITIONS: Record<ServiceType, ServiceDefinition> = {
-  information: {
-    class: Service.AccessoryInformation,
-    type: 'information',
-    handler: InformationHandler,
-  },
-  temperature: {
-    class: Service.TemperatureSensor,
-    type: 'temperature',
-    handler: TemperatureHandler,
-  },
-  humidity: {
-    class: Service.HumiditySensor,
-    type: 'humidity',
-    handler: HumidityHandler,
-  },
-  battery: {
-    class: Service.Battery,
-    type: 'battery',
-    handler: BatteryHandler,
-  },
-  illuminance: {
-    class: Service.LightSensor,
-    type: 'illuminance',
-    handler: IlluminanceHandler,
-  },
-  button: {
-    class: Service.StatelessProgrammableSwitch,
-    type: 'button',
-    handler: ButtonHandler,
-  },
-  motion: {
-    class: Service.MotionSensor,
-    type: 'motion',
-    handler: MotionHandler,
-  },
-  contact: {
-    class: Service.ContactSensor,
-    type: 'contact',
-    handler: ContactHandler,
-  },
-};
+import { ServiceClass, ServiceDefinition } from './types.js';
+import { ServiceHandler } from './base.js';
 
 export class ServiceManager {
+  private readonly api: API;
   private readonly accessory: PlatformAccessory;
   private readonly autoDiscovery: boolean;
+  private readonly definitions: Record<ServiceType, ServiceDefinition>;
   private readonly handlers: Map<string, ServiceHandler> = new Map();
   private readonly log: Logger;
 
-  constructor(accessory: PlatformAccessory, logger: Logger, config?: ServicesConfig) {
+  constructor(accessory: PlatformAccessory, api: API, logger: Logger, config?: ServicesConfig) {
     this.accessory = accessory;
-    this.autoDiscovery = config?.autoDiscovery !== false;
+
+    this.api = api;
     this.log = logger;
+
+    this.autoDiscovery = config?.autoDiscovery !== false;
+    this.definitions = this.createServiceDefinitions();
 
     if (!this.autoDiscovery) {
       this.configureServices(config?.enabled || []);
     }
+  }
+  createServiceDefinitions(): Record<ServiceType, ServiceDefinition> {
+    const Service = this.api.hap.Service;
+
+    return {
+      information: {
+        class: Service.AccessoryInformation,
+        type: 'information',
+        handler: InformationHandler,
+      },
+      temperature: {
+        class: Service.TemperatureSensor,
+        type: 'temperature',
+        handler: TemperatureHandler,
+      },
+      humidity: {
+        class: Service.HumiditySensor,
+        type: 'humidity',
+        handler: HumidityHandler,
+      },
+      battery: {
+        class: Service.Battery,
+        type: 'battery',
+        handler: BatteryHandler,
+      },
+      illuminance: {
+        class: Service.LightSensor,
+        type: 'illuminance',
+        handler: IlluminanceHandler,
+      },
+      button: {
+        class: Service.StatelessProgrammableSwitch,
+        type: 'button',
+        handler: ButtonHandler,
+      },
+      motion: {
+        class: Service.MotionSensor,
+        type: 'motion',
+        handler: MotionHandler,
+      },
+      contact: {
+        class: Service.ContactSensor,
+        type: 'contact',
+        handler: ContactHandler,
+      },
+    };
   }
 
   public update(sensorData: BTHomeSensorData) {
@@ -149,7 +146,7 @@ export class ServiceManager {
   }
 
   private configureService(config: ServiceConfig) {
-    const serviceDefinition = this.getServiceDefinition(config.type);
+    const serviceDefinition = this.definitions[config.type];
 
     if (!serviceDefinition) {
       throw new Error(`No service definition found for type: ${config.type}`);
@@ -164,7 +161,7 @@ export class ServiceManager {
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
-      this.handlers.set(handlerKey, new serviceDefinition.handler(service, config.options));
+      this.handlers.set(handlerKey, new serviceDefinition.handler(this.api, service, config.options));
     }
 
     return service;
@@ -180,15 +177,14 @@ export class ServiceManager {
   private getService(serviceClass: ServiceClass, position: number = 1): Service | undefined {
     const subType = this.getServiceSubType(serviceClass, position);
 
-    return this.accessory.getServiceById(serviceClass, subType) || this.accessory.getService(serviceClass);
-  }
+    const service = this.accessory.getServiceById(serviceClass, subType);
 
-  private getServiceDefinition(serviceType: ServiceType): ServiceDefinition | undefined {
-    if (SERVICE_DEFINITIONS[serviceType]) {
-      return SERVICE_DEFINITIONS[serviceType];
+    // Fallback to v1 service without subtype
+    if (!service && position === 1) {
+      return this.accessory.getService(serviceClass);
     }
 
-    return undefined;
+    return service;
   }
 
   private getServiceSubType(serviceClass: ServiceClass, position: number = 1): string {

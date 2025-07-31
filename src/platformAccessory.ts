@@ -24,7 +24,7 @@ export class BTHomeAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
-    this.services = new ServiceManager(this.accessory, platform.log, this.getServiceConfiguration());
+    this.services = new ServiceManager(accessory, platform.api, platform.log, this.getServiceConfiguration());
 
     this.device.onUpdate(this.onDeviceUpdate.bind(this));
   }
