@@ -6,9 +6,11 @@ export class ButtonHandler extends ServiceHandler {
   public updateValues(sensorData: BTHomeSensorData) {
     const buttonEvent = this.mapButtonEvent(sensorData.button);
 
-    if (buttonEvent !== null) {
-      this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchEvent).updateValue(buttonEvent);
+    if (buttonEvent === null) {
+      return;
     }
+
+    this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchEvent).updateValue(buttonEvent);
   }
 
   private mapButtonEvent(event?: ButtonEvent): CharacteristicValue | null {

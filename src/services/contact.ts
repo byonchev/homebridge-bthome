@@ -4,11 +4,13 @@ import { ServiceHandler } from './base.js';
 
 export class ContactHandler extends ServiceHandler {
   public updateValues(sensorData: BTHomeSensorData) {
-    if (sensorData.contactDetected !== undefined) {
-      const state = this.mapState(sensorData.contactDetected);
-
-      this.service.getCharacteristic(this.Characteristic.ContactSensorState).updateValue(state);
+    if (sensorData.contactDetected === undefined) {
+      return;
     }
+
+    const state = this.mapState(sensorData.contactDetected);
+
+    this.service.getCharacteristic(this.Characteristic.ContactSensorState).updateValue(state);
   }
 
   private mapState(contactDetected: boolean): CharacteristicValue {
