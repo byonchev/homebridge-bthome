@@ -79,18 +79,18 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
       this.log.info('Bluetooth scanner started');
     } catch (error) {
-      this.log.error('Failed to initialize bluetooth scanner:', error);
+      this.log.error('Failed to initialize bluetooth scanner:\n', error);
     }
   }
 
   private onDeviceDiscovered(device: BluetoothDevice) {
     const mac = device.mac;
 
-    this.log.debug('Device with MAC address ' + mac + ' is advertising');
+    this.log.debug(`[${mac.toLocaleLowerCase()}] Device is advertising`);
 
     const config = this.getDeviceConfiguration(mac);
     if (!config) {
-      this.log.debug('Skipping not configured device:', mac);
+      this.log.debug(`[${mac.toLocaleLowerCase()}] Skipping not configured device`);
       return;
     }
 
@@ -114,7 +114,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       try {
         accessory = new this.api.platformAccessory(name, uuid);
       } catch (error) {
-        this.log.error('Failed to create accessory:', error);
+        this.log.error('Failed to create accessory:\n', error);
         return;
       }
 
@@ -126,11 +126,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.accessories.set(accessory.UUID, accessory);
     }
 
-    try {
-      accessory.context.device.update(device.serviceData);
-    } catch (error) {
-      this.log.error('Failed to update BTHome device: ', error);
-    }
+    accessory.context.device.update(device.serviceData);
   }
 
   private getDeviceConfiguration(mac: string): DeviceConfig | undefined {
