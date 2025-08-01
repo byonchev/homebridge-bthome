@@ -34,52 +34,6 @@ export class ServiceManager {
       this.configureServices(config?.enabled || []);
     }
   }
-  createServiceDefinitions(): Record<ServiceType, ServiceDefinition> {
-    const Service = this.api.hap.Service;
-
-    return {
-      information: {
-        class: Service.AccessoryInformation,
-        type: 'information',
-        handler: InformationHandler,
-      },
-      temperature: {
-        class: Service.TemperatureSensor,
-        type: 'temperature',
-        handler: TemperatureHandler,
-      },
-      humidity: {
-        class: Service.HumiditySensor,
-        type: 'humidity',
-        handler: HumidityHandler,
-      },
-      battery: {
-        class: Service.Battery,
-        type: 'battery',
-        handler: BatteryHandler,
-      },
-      illuminance: {
-        class: Service.LightSensor,
-        type: 'illuminance',
-        handler: IlluminanceHandler,
-      },
-      button: {
-        class: Service.StatelessProgrammableSwitch,
-        type: 'button',
-        handler: ButtonHandler,
-      },
-      motion: {
-        class: Service.MotionSensor,
-        type: 'motion',
-        handler: MotionHandler,
-      },
-      contact: {
-        class: Service.ContactSensor,
-        type: 'contact',
-        handler: ContactHandler,
-      },
-    };
-  }
 
   public update(sensorData: BTHomeSensorData) {
     if (this.autoDiscovery) {
@@ -89,38 +43,6 @@ export class ServiceManager {
     this.handlers.forEach(handler => {
       handler.updateValues(sensorData);
     });
-  }
-
-  private discoverServices(sensorData: BTHomeSensorData) {
-    this.configureService({ type: 'information' });
-
-    if (sensorData.temperature !== undefined) {
-      this.configureService({ type: 'temperature' });
-    }
-
-    if (sensorData.humidity !== undefined) {
-      this.configureService({ type: 'humidity' });
-    }
-
-    if (sensorData.battery !== undefined) {
-      this.configureService({ type: 'battery', options: { lowBatteryThreshold: 10 } });
-    }
-
-    if (sensorData.illuminance !== undefined) {
-      this.configureService({ type: 'illuminance' });
-    }
-
-    if (sensorData.button !== undefined) {
-      this.configureService({ type: 'button' });
-    }
-
-    if (sensorData.motionDetected !== undefined) {
-      this.configureService({ type: 'motion' });
-    }
-
-    if (sensorData.contactDetected !== undefined) {
-      this.configureService({ type: 'contact' });
-    }
   }
 
   private configureServices(configs: ServiceConfig[]) {
@@ -189,5 +111,84 @@ export class ServiceManager {
 
   private getServiceSubType(serviceClass: ServiceClass, position: number = 1): string {
     return `${serviceClass.name}_${position}`;
+  }
+
+  private createServiceDefinitions(): Record<ServiceType, ServiceDefinition> {
+    const Service = this.api.hap.Service;
+
+    return {
+      information: {
+        class: Service.AccessoryInformation,
+        type: 'information',
+        handler: InformationHandler,
+      },
+      temperature: {
+        class: Service.TemperatureSensor,
+        type: 'temperature',
+        handler: TemperatureHandler,
+      },
+      humidity: {
+        class: Service.HumiditySensor,
+        type: 'humidity',
+        handler: HumidityHandler,
+      },
+      battery: {
+        class: Service.Battery,
+        type: 'battery',
+        handler: BatteryHandler,
+      },
+      illuminance: {
+        class: Service.LightSensor,
+        type: 'illuminance',
+        handler: IlluminanceHandler,
+      },
+      button: {
+        class: Service.StatelessProgrammableSwitch,
+        type: 'button',
+        handler: ButtonHandler,
+      },
+      motion: {
+        class: Service.MotionSensor,
+        type: 'motion',
+        handler: MotionHandler,
+      },
+      contact: {
+        class: Service.ContactSensor,
+        type: 'contact',
+        handler: ContactHandler,
+      },
+    };
+  }
+
+  private discoverServices(sensorData: BTHomeSensorData) {
+    this.configureService({ type: 'information' });
+
+    if (sensorData.temperature !== undefined) {
+      this.configureService({ type: 'temperature' });
+    }
+
+    if (sensorData.humidity !== undefined) {
+      this.configureService({ type: 'humidity' });
+    }
+
+    if (sensorData.battery !== undefined) {
+      this.configureService({ type: 'battery', options: { lowBatteryThreshold: 10 } });
+    }
+
+    if (sensorData.illuminance !== undefined) {
+      this.configureService({ type: 'illuminance' });
+    }
+
+    if (sensorData.button !== undefined) {
+      this.configureService({ type: 'button' });
+    }
+
+    if (sensorData.motionDetected !== undefined) {
+      this.configureService({ type: 'motion' });
+    }
+
+    if (sensorData.contactDetected !== undefined) {
+      this.configureService({ type: 'contact' });
+    }
   }
 }

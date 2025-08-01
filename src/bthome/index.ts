@@ -38,16 +38,22 @@ export class BTHomeDevice {
   }
 
   update(payload: Buffer) {
-    const newPayload = this.decodePayload(payload);
+    try {
+      const newPayload = this.decodePayload(payload);
 
-    // Deduplicate repeated events if id is present
-    if (this.lastPayload?.id && this.lastPayload.id === newPayload.id) {
-      return;
+      // Deduplicate repeated events if id is present
+      if (this.lastPayload?.id && this.lastPayload.id === newPayload.id) {
+        this.log.debug(`[${this.getAddress()}] Ignoring repeated payload`);
+
+        return;
+      }
+
+      this.lastPayload = newPayload;
+
+      this.events.emit(BTHomeDevice.UPDATE_EVENT, newPayload);
+    } catch (error) {
+      this.log.error(`[${this.getAddress()}] Failed to update BTHome device!\n`, error);
     }
-
-    this.lastPayload = newPayload;
-
-    this.events.emit(BTHomeDevice.UPDATE_EVENT, newPayload);
   }
 
   onUpdate(callback: (data: BTHomeSensorData) => void) {
@@ -74,6 +80,12 @@ export class BTHomeDevice {
 
   private decodePayload(payload: Buffer): BTHomeSensorData {
     const flags = payload.readUInt8(0);
+    const version = (flags >> 5) & 0x07;
+
+    if (version !== 2) {
+      throw new BTHomeDecodingError('Unsupported payload version');
+    }
+
     const isEncrypted = (flags & 0x01) !== 0;
 
     let result: BTHomeSensorData;
@@ -292,7 +304,13 @@ export class BTHomeDevice {
           offset += data.readUint8(offset + 1) + 2;
           break;
         default:
-          throw new BTHomeDecodingError('Unsupported object id in payload: 0x' + objectId.toString(16));
+          this.log.warn(
+            `[${this.getAddress()}] ` +
+              `Unsupported object id 0x${objectId.toString(16)} at offset ${offset}. ` +
+              `The rest of the payload will be ignored.`,
+          );
+
+          return result;
       }
     }
 
@@ -319,7 +337,9 @@ export class BTHomeDevice {
       case 0xfe:
         return ButtonEvent.HoldPress;
       default:
-        throw new BTHomeDecodingError('Unsupported button event: 0x' + state.toString(16));
+        this.log.warn(`[${this.getAddress()}] Unsupported button event: 0x${state.toString(16)}`);
+
+        return ButtonEvent.None;
     }
   }
 }
