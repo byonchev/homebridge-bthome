@@ -1,5 +1,5 @@
 export type BTHomeSensorData = {
-  id?: number;
+  packetId?: number;
   firmwareVersion?: string;
   counter?: number;
   temperature?: number;

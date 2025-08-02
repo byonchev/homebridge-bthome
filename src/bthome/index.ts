@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 
 import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEvent } from './types.js';
 import { wrapError } from '../util/errors.js';
-import { ManufacturerData } from '../bluetooth/types.js';
+import { BluetoothAdvertisment, ManufacturerData } from '../bluetooth/types.js';
 import { Logger } from 'homebridge';
 
 type DecryptionResult = {
@@ -18,41 +18,41 @@ export class BTHomeDevice {
   private static readonly MAX_COUNTER_VALUE = 4294967295;
   private static readonly UPDATE_EVENT = 'update';
 
-  private readonly mac: Buffer;
+  private readonly mac: string;
   private readonly manufacturerData: ManufacturerData;
   private readonly encryptionKey?: Buffer;
   private readonly events: EventEmitter = new EventEmitter();
   private readonly log: Logger;
 
-  private lastPayload?: BTHomeSensorData;
+  private lastPacketId?: number;
+  private lastCounterValue?: number;
 
-  constructor(mac: string, manufacturerData: ManufacturerData, log: Logger, encryptionKey?: string, payload?: Buffer) {
+  constructor(advertisment: BluetoothAdvertisment, log: Logger, encryptionKey?: string) {
     this.log = log;
-    this.mac = Buffer.from(mac.replaceAll(':', ''), 'hex');
-    this.manufacturerData = manufacturerData;
+    this.mac = advertisment.mac;
+    this.manufacturerData = advertisment.manufacturerData;
     this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
-
-    if (payload) {
-      this.update(payload);
-    }
   }
 
-  update(payload: Buffer) {
+  update(serviceData: Buffer) {
     try {
-      const newPayload = this.decodePayload(payload);
+      const sensorData = this.decodeServiceData(serviceData);
 
-      // Deduplicate repeated events if id is present
-      if (this.lastPayload?.id && this.lastPayload.id === newPayload.id) {
-        this.log.debug(`[${this.getAddress()}] Ignoring repeated payload`);
+      // Deduplicate repeated events if packetId is present
+      if (this.lastPacketId !== undefined && this.lastPacketId === sensorData.packetId) {
+        this.log.debug(`[${this.mac}] Ignoring repeated data with packetId ${sensorData.packetId}`);
 
         return;
       }
 
-      this.lastPayload = newPayload;
+      this.lastPacketId = sensorData.packetId;
+      this.lastCounterValue = sensorData.counter;
 
-      this.events.emit(BTHomeDevice.UPDATE_EVENT, newPayload);
+      this.log.debug(`[${this.mac}] Received BTHome sensor data:`, sensorData);
+
+      this.events.emit(BTHomeDevice.UPDATE_EVENT, sensorData);
     } catch (error) {
-      this.log.error(`[${this.getAddress()}] Failed to update BTHome device!\n`, error);
+      this.log.error(`[${this.mac}] Failed to update BTHome device!\n`, error);
     }
   }
 
@@ -60,26 +60,12 @@ export class BTHomeDevice {
     this.events.on(BTHomeDevice.UPDATE_EVENT, callback);
   }
 
-  getSensorData(): BTHomeSensorData | null {
-    if (!this.lastPayload) {
-      return null;
-    }
-
-    return Object.assign({}, this.lastPayload);
-  }
-
-  getAddress(separator: string = ':'): string {
-    const mac = this.mac.toString('hex');
-
-    return mac.match(/.{1,2}/g)?.join(separator) || mac;
-  }
-
   getManufacturerData(): ManufacturerData {
     return Object.assign({}, this.manufacturerData);
   }
 
-  private decodePayload(payload: Buffer): BTHomeSensorData {
-    const flags = payload.readUInt8(0);
+  private decodeServiceData(serviceData: Buffer): BTHomeSensorData {
+    const flags = serviceData.readUInt8(0);
     const version = (flags >> 5) & 0x07;
 
     if (version !== 2) {
@@ -91,18 +77,18 @@ export class BTHomeDevice {
     let result: BTHomeSensorData;
 
     if (isEncrypted) {
-      const decryptionResult = this.decryptPayload(flags, payload);
+      const decryptionResult = this.decryptSensorData(flags, serviceData);
 
       result = this.decodeSensorData(decryptionResult.data);
       result.counter = decryptionResult.counter;
     } else {
-      result = this.decodeSensorData(payload.subarray(1));
+      result = this.decodeSensorData(serviceData.subarray(1));
     }
 
     return result;
   }
 
-  private decryptPayload(flags: number, payload: Buffer): DecryptionResult {
+  private decryptSensorData(flags: number, payload: Buffer): DecryptionResult {
     if (!this.encryptionKey) {
       throw new BTHomeDecryptionError('Encrypted payload, but no encryption key provided');
     }
@@ -115,14 +101,19 @@ export class BTHomeDevice {
     const counter = payload.subarray(-8, -4);
     const mic = payload.subarray(-4);
 
-    const previousCounterValue = this.lastPayload?.counter || -1;
+    const oldCounterValue = this.lastCounterValue || -1;
     const newCounterValue = counter.readUint32LE();
 
-    if (previousCounterValue < BTHomeDevice.MAX_COUNTER_VALUE && newCounterValue < previousCounterValue) {
+    if (oldCounterValue < BTHomeDevice.MAX_COUNTER_VALUE && newCounterValue < oldCounterValue) {
       throw new BTHomeDecryptionError('Reused previous counter value in encrypted payload. Possible replay attack');
     }
 
-    const nonce = Buffer.concat([this.mac, BTHomeDevice.UUID_LE, Buffer.from([flags]), counter]);
+    const nonce = Buffer.concat([
+      Buffer.from(this.mac.replaceAll(':', ''), 'hex'),
+      BTHomeDevice.UUID_LE,
+      Buffer.from([flags]),
+      counter,
+    ]);
 
     try {
       const decipher = crypto.createDecipheriv('aes-128-ccm', this.encryptionKey, nonce, { authTagLength: 4 });
@@ -143,7 +134,7 @@ export class BTHomeDevice {
 
     let offset = 0;
 
-    this.log.debug(`[${this.getAddress()}] Decoding BTHome payload: ${data.toString('hex')}`);
+    this.log.debug(`[${this.mac}] Decoding BTHome sensor data: ${data.toString('hex')}`);
 
     while (offset < data.length) {
       const objectId = data[offset];
@@ -151,7 +142,7 @@ export class BTHomeDevice {
       switch (objectId) {
         // ID
         case 0x00:
-          result.id = data.readUInt8(offset + 1);
+          result.packetId = data.readUInt8(offset + 1);
           offset += 2;
           break;
 
@@ -305,7 +296,7 @@ export class BTHomeDevice {
           break;
         default:
           this.log.warn(
-            `[${this.getAddress()}] ` +
+            `[${this.mac}] ` +
               `Unsupported object id 0x${objectId.toString(16)} at offset ${offset}. ` +
               `The rest of the payload will be ignored.`,
           );
@@ -337,7 +328,7 @@ export class BTHomeDevice {
       case 0xfe:
         return ButtonEvent.HoldPress;
       default:
-        this.log.warn(`[${this.getAddress()}] Unsupported button event: 0x${state.toString(16)}`);
+        this.log.warn(`[${this.mac}] Unsupported button event: 0x${state.toString(16)}`);
 
         return ButtonEvent.None;
     }
