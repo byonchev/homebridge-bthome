@@ -1,4 +1,5 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, Service } from 'homebridge';
+import { formatError } from 'homebridge-lib';
 
 import { BTHomeAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -80,7 +81,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
       this.log.info('Bluetooth scanner started');
     } catch (error) {
-      this.log.error('Failed to initialize bluetooth scanner:\n', error);
+      this.log.error('Failed to initialize bluetooth scanner.', formatError(error));
     }
   }
 
@@ -113,7 +114,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       try {
         accessory = new this.api.platformAccessory(name, uuid);
       } catch (error) {
-        this.log.error('Failed to create accessory:\n', error);
+        this.log.error('Failed to create accessory.', formatError(error));
         return;
       }
 

@@ -5,6 +5,7 @@ import { BTHomeSensorData, BTHomeDecryptionError, BTHomeDecodingError, ButtonEve
 import { wrapError } from '../util/errors.js';
 import { BluetoothAdvertisment, ManufacturerData } from '../bluetooth/types.js';
 import { Logger } from 'homebridge';
+import { formatError } from 'homebridge-lib';
 
 type DecryptionResult = {
   data: Buffer;
@@ -52,7 +53,7 @@ export class BTHomeDevice {
 
       this.events.emit(BTHomeDevice.UPDATE_EVENT, sensorData);
     } catch (error) {
-      this.log.error(`[${this.mac}] Failed to update BTHome device!\n`, error);
+      this.log.error(`[${this.mac}] Failed to update BTHome device.`, formatError(error));
     }
   }
 
