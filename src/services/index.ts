@@ -74,16 +74,19 @@ export class ServiceManager {
       throw new Error(`No service definition found for type: ${config.type}`);
     }
 
+    const options = config.options || {};
+
     this.log.debug(
-      `[${this.accessory.displayName}] Configuring ${serviceDefinition.class.name} with options:`,
-      config.options || {},
+      `[${this.accessory.displayName}]` +
+        ` Configuring ${serviceDefinition.class.name} service` +
+        `${Object.keys(options).length ? ` with options: ${JSON.stringify(options)}` : ''}`,
     );
 
-    const service = this.upsertService(serviceDefinition.class, config.options?.position);
+    const service = this.upsertService(serviceDefinition.class, options.position);
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
-      this.handlers.set(handlerKey, new serviceDefinition.handler(this.api, service, config.options));
+      this.handlers.set(handlerKey, new serviceDefinition.handler(this.api, service, options));
     }
 
     return service;
