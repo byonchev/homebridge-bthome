@@ -41,30 +41,33 @@ export class BluetoothScanner {
     }
   }
 
-  async start(timeout : number = BluetoothScanner.DEFAULT_TIMEOUT) {
+  async start(timeout: number = BluetoothScanner.DEFAULT_TIMEOUT) {
     if (this.started) {
       return;
     }
 
-    return withTimeout(async () => {
-      const noble = await this.getNobleInstance();
-      this.log.debug('Loaded noble instance');
+    return withTimeout(
+      async () => {
+        const noble = await this.getNobleInstance();
+        this.log.debug('Loaded noble instance');
 
-      try {
-        await noble.waitForPoweredOn(timeout);
-        this.log.debug('Bluetooth device powered on');
+        try {
+          await noble.waitForPoweredOn(timeout);
+          this.log.debug('Bluetooth device powered on');
 
-        noble.on('discover', this.onDiscoverInternal.bind(this));
+          noble.on('discover', this.onDiscoverInternal.bind(this));
 
-        await noble.startScanningAsync([this.serviceUuid], true);
-        this.log.debug(`Started scanning for devices with service uuid: ${this.serviceUuid}`);
+          await noble.startScanningAsync([this.serviceUuid], true);
+          this.log.debug(`Started scanning for devices with service uuid: ${this.serviceUuid}`);
 
-        this.started = true;
-      } catch (error) {
-        throw wrapError(error, BluetoothError, 'Unknown bluetooth error');
-      }
-    },
-    timeout, new BluetoothError('Bluetooth scanner initialization timeout'));
+          this.started = true;
+        } catch (error) {
+          throw wrapError(error, BluetoothError, 'Unknown bluetooth error');
+        }
+      },
+      timeout,
+      new BluetoothError('Bluetooth scanner initialization timeout'),
+    );
   }
 
   onDiscover(callback: (device: BluetoothAdvertisment) => void) {

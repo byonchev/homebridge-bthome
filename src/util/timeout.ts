@@ -1,12 +1,9 @@
-export async function withTimeout<T>(
+export const withTimeout = async <T>(
   promise: Promise<T> | (() => Promise<T>),
   timeout: number,
   error: Error,
-): Promise<T> {
+): Promise<T> => {
   promise = typeof promise === 'function' ? promise() : promise;
 
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) => setTimeout(() => reject(error), timeout)),
-  ]);
-}
+  return Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(error), timeout))]);
+};
