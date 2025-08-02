@@ -4,7 +4,7 @@ import { BTHomeAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { BluetoothScanner } from './bluetooth/index.js';
 import { BTHomeDevice } from './bthome/index.js';
-import { BluetoothDevice } from './bluetooth/types.js';
+import { BluetoothAdvertisment } from './bluetooth/types.js';
 import { BTHomePlatformConfig, DeviceConfig } from './config.js';
 
 export class BTHomePlatform implements DynamicPlatformPlugin {
@@ -40,13 +40,14 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
-    let mac = accessory.context.mac;
+    let mac = accessory.context.device?.mac;
 
-    if (!mac && accessory.context.device?.mac) {
+    if (typeof mac === 'object' && 'data' in mac) {
       mac = Buffer.from(accessory.context.device.mac.data).toString('hex');
     }
 
     const config = this.getDeviceConfiguration(mac || '');
+
     if (!config) {
       this.staleAccessories.push(accessory);
     }
@@ -83,31 +84,29 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     }
   }
 
-  private onDeviceDiscovered(device: BluetoothDevice) {
-    const mac = device.mac;
+  private onDeviceDiscovered(advertisment: BluetoothAdvertisment) {
+    this.log.debug(`[${advertisment.mac}] Device is advertising`);
 
-    this.log.debug(`[${mac.toLocaleLowerCase()}] Device is advertising`);
-
-    const config = this.getDeviceConfiguration(mac);
+    const config = this.getDeviceConfiguration(advertisment.mac);
     if (!config) {
-      this.log.debug(`[${mac.toLocaleLowerCase()}] Skipping not configured device`);
+      this.log.debug(`[${advertisment.mac}] Skipping not configured device`);
       return;
     }
 
-    const uuid = this.generateUUID(mac);
+    const uuid = this.generateUUID(advertisment.mac);
 
     let accessory = this.accessories.get(uuid);
 
     if (accessory && !this.handles.has(uuid)) {
       this.log.info('Restoring existing accessory from cache:', accessory.displayName);
 
-      this.setAccessoryContext(accessory, config, device);
+      this.setAccessoryContext(accessory, config, advertisment);
 
       this.handles.set(uuid, new BTHomeAccessory(this, accessory));
     }
 
     if (!accessory) {
-      const name = (config.name || device.name).replace(/[^a-zA-Z0-9\s']/g, '');
+      const name = (config.name || advertisment.name).replace(/[^a-zA-Z0-9\s']/g, '');
 
       this.log.info('Adding new accessory:', name);
 
@@ -118,7 +117,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
         return;
       }
 
-      this.setAccessoryContext(accessory, config, device);
+      this.setAccessoryContext(accessory, config, advertisment);
 
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
 
@@ -126,7 +125,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
       this.accessories.set(accessory.UUID, accessory);
     }
 
-    accessory.context.device.update(device.serviceData);
+    accessory.context.device.update(advertisment.serviceData);
   }
 
   private getDeviceConfiguration(mac: string): DeviceConfig | undefined {
@@ -137,7 +136,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     }
 
     for (const config of this.config.devices) {
-      if (config.mac.replaceAll(':', '').toLowerCase() === mac.replaceAll(':', '').toLowerCase()) {
+      if (config.mac.replaceAll(':', '').toLocaleLowerCase() === mac.replaceAll(':', '').toLocaleLowerCase()) {
         return config;
       }
     }
@@ -145,16 +144,8 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     return undefined;
   }
 
-  private setAccessoryContext(accessory: PlatformAccessory, config: DeviceConfig, device: BluetoothDevice) {
-    accessory.context.mac = device.mac;
-    accessory.context.device = new BTHomeDevice(
-      device.mac,
-      device.manufacturerData,
-      this.log,
-      config.encryptionKey,
-      device.serviceData,
-    );
-
+  private setAccessoryContext(accessory: PlatformAccessory, config: DeviceConfig, advertisment: BluetoothAdvertisment) {
+    accessory.context.device = new BTHomeDevice(advertisment, this.log, config.encryptionKey);
     accessory.context.services = config.services || { autoDiscovery: true };
   }
 

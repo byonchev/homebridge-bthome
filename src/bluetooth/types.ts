@@ -1,4 +1,4 @@
-export type BluetoothDevice = {
+export type BluetoothAdvertisment = {
   name: string;
   mac: string;
   serviceData: Buffer;

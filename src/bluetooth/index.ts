@@ -1,7 +1,7 @@
 import { Peripheral } from '@stoprocent/noble';
 import { EventEmitter } from 'events';
 
-import { BluetoothDevice, ManufacturerData, BluetoothError } from './types.js';
+import { BluetoothAdvertisment, ManufacturerData, BluetoothError } from './types.js';
 import { wrapError } from '../util/errors.js';
 import { decodeShellyManufacturerData } from './shelly.js';
 import { Logger } from 'homebridge';
@@ -67,7 +67,7 @@ export class BluetoothScanner {
     timeout, new BluetoothError('Bluetooth scanner initialization timeout'));
   }
 
-  onDiscover(callback: (device: BluetoothDevice) => void) {
+  onDiscover(callback: (device: BluetoothAdvertisment) => void) {
     this.events.on(BluetoothScanner.DISCOVER_EVENT, callback);
   }
 
@@ -82,14 +82,14 @@ export class BluetoothScanner {
 
     const serviceData = service.data;
     const manufacturerData = this.decodeManufacturerData(advertisementData.manufacturerData);
-    const mac = peripheral.address.toLowerCase() || manufacturerData?.mac?.toLowerCase() || 'unknown';
+    const mac = manufacturerData?.mac?.toLocaleLowerCase() || peripheral.address.toLowerCase() || 'unknown';
     const name = advertisementData.localName || this.generateDeviceName(mac);
 
     if (!manufacturerData.serialNumber) {
       manufacturerData.serialNumber = mac;
     }
 
-    const device: BluetoothDevice = { name, mac, serviceData, manufacturerData };
+    const device: BluetoothAdvertisment = { name, mac, serviceData, manufacturerData };
 
     this.events.emit(BluetoothScanner.DISCOVER_EVENT, device);
   }
