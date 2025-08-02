@@ -48,7 +48,7 @@ export class BTHomeDevice {
       this.lastPacketId = sensorData.packetId;
       this.lastCounterValue = sensorData.counter;
 
-      this.log.debug(`[${this.mac}] Received BTHome sensor data:`, sensorData);
+      this.log.debug(`[${this.mac}] Received BTHome sensor data:\n${JSON.stringify(sensorData, null, 2)}`);
 
       this.events.emit(BTHomeDevice.UPDATE_EVENT, sensorData);
     } catch (error) {
