@@ -1,4 +1,4 @@
-import { ManufacturerData } from './types';
+import { ManufacturerData } from './types.js';
 
 const decodeModelName = (identifier: number): string | undefined => {
   switch (identifier) {

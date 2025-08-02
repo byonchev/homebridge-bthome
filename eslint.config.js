@@ -2,6 +2,7 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
+import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
   {
@@ -10,6 +11,7 @@ export default tseslint.config(
   {
     plugins: {
       prettier: prettierPlugin,
+      import: importPlugin,
     },
     rules: {
       eqeqeq: ['error', 'smart'],
@@ -21,6 +23,7 @@ export default tseslint.config(
       '@typescript-eslint/no-use-before-define': ['error', { classes: false, enums: false }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'prettier/prettier': 'error',
+      'import/extensions': ['error', 'always', { js: 'always' }],
     },
   },
   {

@@ -1,6 +1,6 @@
 import { API, Characteristic, Service } from 'homebridge';
-import { ServiceOptions } from '../config';
-import { BTHomeSensorData } from '../bthome/types';
+import { ServiceOptions } from '../config.js';
+import { BTHomeSensorData } from '../bthome/types.js';
 
 export abstract class ServiceHandler {
   protected readonly Characteristic: typeof Characteristic;

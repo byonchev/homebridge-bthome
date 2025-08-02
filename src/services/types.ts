@@ -1,6 +1,6 @@
 import { API, Service, WithUUID } from 'homebridge';
-import { ServiceOptions, ServiceType } from '../config';
-import { ServiceHandler } from './base';
+import { ServiceOptions, ServiceType } from '../config.js';
+import { ServiceHandler } from './base.js';
 
 export type ServiceClass = WithUUID<typeof Service>;
 
