@@ -3,6 +3,10 @@ import { BTHomeSensorData } from '../bthome/types.js';
 import { ServiceHandler } from './base.js';
 
 export class ContactHandler extends ServiceHandler {
+  public static matches(sensorData: BTHomeSensorData): boolean {
+    return sensorData.contactDetected !== undefined;
+  }
+
   public updateValues(sensorData: BTHomeSensorData) {
     if (sensorData.contactDetected === undefined) {
       return;

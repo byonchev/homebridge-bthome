@@ -3,6 +3,10 @@ import { CharacteristicValue } from 'homebridge';
 import { ServiceHandler } from './base.js';
 
 export class ButtonHandler extends ServiceHandler {
+  public static matches(sensorData: BTHomeSensorData): boolean {
+    return sensorData.button !== undefined;
+  }
+
   public updateValues(sensorData: BTHomeSensorData) {
     const buttonEvent = this.mapButtonEvent(sensorData.button);
 
