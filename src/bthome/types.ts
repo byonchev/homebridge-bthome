@@ -4,7 +4,9 @@ export type BTHomeSensorData = {
   counter?: number;
   temperature?: number;
   humidity?: number;
-  battery?: number;
+  batteryLevel?: number;
+  batteryLow?: boolean;
+  batteryCharging?: boolean;
   button?: ButtonEvent;
   illuminance?: number;
   motionDetected?: boolean;

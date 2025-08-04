@@ -159,7 +159,15 @@ export class BTHomeDevice {
 
         // Battery
         case 0x01:
-          result.battery = data.readUInt8(offset + 1);
+          result.batteryLevel = data.readUInt8(offset + 1);
+          offset += 2;
+          break;
+        case 0x15:
+          result.batteryLow = data.readUInt8(offset + 1) === 1;
+          offset += 2;
+          break;
+        case 0x16:
+          result.batteryCharging = data.readUInt8(offset + 1) === 1;
           offset += 2;
           break;
 
@@ -222,8 +230,6 @@ export class BTHomeDevice {
         case 0x2f:
         case 0x59:
         case 0x46:
-        case 0x15:
-        case 0x16:
         case 0x17:
         case 0x18:
         case 0x19:
