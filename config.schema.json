@@ -50,7 +50,7 @@
               "properties": {
                 "autoDiscovery": {
                   "title": "Auto-Discovery",
-                  "description": "Automatically detect the services of this device based on data received.<br/>Note: Event-based services (like buttons) will only appear after their first use, while sensor services (like temperature) appear immediately when data is received.",
+                  "description": "Automatically detect the services of this device based on data received.",
                   "type": "boolean",
                   "default": true,
                   "required": false
@@ -110,11 +110,12 @@
                         "properties": {
                           "lowBatteryThreshold": {
                             "title": "Low Battery Threshold",
-                            "description": "Battery percentage below which the device will show as 'Low Battery'",
+                            "description": "Battery percentage below which the device will show as 'Low Battery' (if device reports battery level)",
                             "type": "integer",
                             "minimum": 1,
                             "maximum": 100,
                             "widget": "updown",
+                            "placeholder": "10",
                             "condition": {
                               "functionBody": "return model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].type === 'battery';"
                             },

@@ -3,6 +3,8 @@ import { BTHomeSensorData } from '../bthome/types.js';
 import { ServiceHandler } from './base.js';
 
 export class BatteryHandler extends ServiceHandler {
+  private static readonly DEFAULT_LOW_BATTERY_THRESHOLD = 10;
+
   public static matches(sensorData: BTHomeSensorData): boolean {
     return (
       sensorData.batteryLevel !== undefined ||
@@ -34,6 +36,8 @@ export class BatteryHandler extends ServiceHandler {
     if (reportedLevel !== undefined && threshold !== undefined && reportedLevel < threshold) {
       return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
     } else if (reportedLow) {
+      return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
+    } else if (reportedLevel !== undefined && reportedLevel < BatteryHandler.DEFAULT_LOW_BATTERY_THRESHOLD) {
       return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
     } else {
       return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
