@@ -11,6 +11,13 @@ export type BTHomeSensorData = {
   illuminance?: number;
   motionDetected?: boolean;
   contactDetected?: boolean;
+  occupancyDetected?: boolean;
+  carbonMonoxideDetected?: boolean;
+  smokeDetected?: boolean;
+  carbonDioxideLevel?: number;
+  vocDensity?: number;
+  pm25Density?: number;
+  pm10Density?: number;
 };
 
 export enum ButtonEvent {

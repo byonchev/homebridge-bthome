@@ -1,4 +1,4 @@
-import { API, Service, WithUUID } from 'homebridge';
+import { API, Logger, Service, WithUUID } from 'homebridge';
 import { ServiceOptions, ServiceType } from '../config.js';
 import { ServiceHandler } from './base.js';
 import { BTHomeSensorData } from '../bthome/types.js';
@@ -12,6 +12,6 @@ export interface ServiceDefinition {
 }
 
 export interface ServiceHandlerClass {
-  new (api: API, service: Service, options?: ServiceOptions): ServiceHandler;
+  new (api: API, log: Logger, service: Service, options?: ServiceOptions): ServiceHandler;
   matches(sensorData: BTHomeSensorData): boolean;
 }

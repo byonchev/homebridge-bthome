@@ -141,7 +141,7 @@ export class BTHomeDevice {
       const objectId = data[offset];
 
       switch (objectId) {
-        // ID
+        // Packet ID
         case 0x00:
           result.packetId = data.readUInt8(offset + 1);
           offset += 2;
@@ -157,7 +157,7 @@ export class BTHomeDevice {
           offset += 4;
           break;
 
-        // Battery
+        // Battery characteristics
         case 0x01:
           result.batteryLevel = data.readUInt8(offset + 1);
           offset += 2;
@@ -171,7 +171,7 @@ export class BTHomeDevice {
           offset += 2;
           break;
 
-        // Temperature
+        // Temperature (°C)
         case 0x02:
           result.temperature = data.readInt16LE(offset + 1) / 100;
           offset += 3;
@@ -189,7 +189,7 @@ export class BTHomeDevice {
           offset += 2;
           break;
 
-        // Humidity
+        // Humidity (%)
         case 0x03:
           result.humidity = data.readUInt16LE(offset + 1) / 100;
           offset += 3;
@@ -199,25 +199,25 @@ export class BTHomeDevice {
           offset += 2;
           break;
 
-        // Button
+        // Button event
         case 0x3a:
           result.button = this.decodeButtonEvent(data.readUint8(offset + 1));
           offset += 2;
           break;
 
-        // Illuminance
+        // Illuminance level (lux)
         case 0x05:
           result.illuminance = (data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16)) / 100;
           offset += 4;
           break;
 
-        // Motion
+        // Motion detected
         case 0x21:
           result.motionDetected = data.readUint8(offset + 1) === 1;
           offset += 2;
           break;
 
-        // Contact
+        // Contact detected
         case 0x1a:
         case 0x1b:
         case 0x2d:
@@ -225,12 +225,53 @@ export class BTHomeDevice {
           offset += 2;
           break;
 
+        // Occupancy detected
+        case 0x23:
+          result.occupancyDetected = data.readUint8(offset + 1) === 1;
+          offset += 2;
+          break;
+
+        // Carbon monoxide detected
+        case 0x17:
+          result.carbonMonoxideDetected = data.readUint8(offset + 1) === 1;
+          offset += 3;
+          break;
+
+        // Smoke detected
+        case 0x29:
+          result.smokeDetected = data.readUint8(offset + 1) === 1;
+          offset += 2;
+          break;
+
+        // Carbon dioxide concentration (ppm)
+        case 0x12:
+          result.carbonDioxideLevel = data.readUInt16LE(offset + 1);
+          offset += 3;
+          break;
+
+        // Particulate matter 2.5uM (ug/m3)
+        case 0x0d:
+          result.pm25Density = data.readUInt16LE(offset + 1);
+          offset += 3;
+          break;
+
+        // Particulate matter 10uM (ug/m3)
+        case 0x0e:
+          result.pm10Density = data.readUInt16LE(offset + 1);
+          offset += 3;
+          break;
+
+        // Volatile organic compounds (ug/m3)
+        case 0x13:
+          result.vocDensity = data.readUInt16LE(offset + 1);
+          offset += 3;
+          break;
+
         // Not implemented
         case 0x09:
         case 0x2f:
         case 0x59:
         case 0x46:
-        case 0x17:
         case 0x18:
         case 0x19:
         case 0x1c:
@@ -240,7 +281,6 @@ export class BTHomeDevice {
         case 0x1f:
         case 0x20:
         case 0x22:
-        case 0x23:
         case 0x11:
         case 0x24:
         case 0x10:
@@ -248,7 +288,6 @@ export class BTHomeDevice {
         case 0x26:
         case 0x27:
         case 0x28:
-        case 0x29:
         case 0x2a:
         case 0x2b:
         case 0x2c:
@@ -258,9 +297,6 @@ export class BTHomeDevice {
         case 0x07:
         case 0x08:
         case 0x0c:
-        case 0x0d:
-        case 0x0e:
-        case 0x13:
         case 0x14:
         case 0x3d:
         case 0x3f:

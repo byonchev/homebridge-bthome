@@ -88,7 +88,7 @@ export class ServiceManager {
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
-      this.handlers.set(handlerKey, new serviceDefinition.handlerClass(this.api, service, options));
+      this.handlers.set(handlerKey, new serviceDefinition.handlerClass(this.api, this.log, service, options));
 
       this.log.debug(
         `[${this.accessory.displayName}]` +
