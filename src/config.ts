@@ -37,13 +37,13 @@ export interface BluetoothConfig {
 }
 
 export interface ServiceOptions {
-  battery?: {
-    lowBatteryThreshold?: number;
-  };
   airQuality?: {
     pm25Breakpoints?: AirQualityBreakpoints;
     pm10Breakpoints?: AirQualityBreakpoints;
     vocBreakpoints?: AirQualityBreakpoints;
+  };
+  battery?: {
+    lowBatteryThreshold?: number;
   };
   carbonDioxide?: {
     threshold?: number;
