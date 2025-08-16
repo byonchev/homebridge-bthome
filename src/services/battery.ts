@@ -5,16 +5,18 @@ import { ServiceHandler } from './base.js';
 export class BatteryHandler extends ServiceHandler {
   private static readonly DEFAULT_LOW_BATTERY_THRESHOLD = 10;
 
-  public static matches(sensorData: BTHomeSensorData): boolean {
-    return (
-      sensorData.batteryLevel !== undefined ||
-      sensorData.batteryLow !== undefined ||
-      sensorData.batteryCharging !== undefined
-    );
+  public static matches(sensorData: BTHomeSensorData): number {
+    const batteryLevels = (sensorData.batteryLevel ?? []).length;
+    const batteryLow = (sensorData.batteryLow ?? []).length;
+    const batteryCharging = (sensorData.batteryCharging ?? []).length;
+
+    return Math.max(batteryLevels, batteryLow, batteryCharging);
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
-    const { batteryLow, batteryLevel, batteryCharging } = sensorData;
+    const batteryLow = this.getMeasurement(sensorData, 'batteryLow');
+    const batteryLevel = this.getMeasurement(sensorData, 'batteryLevel');
+    const batteryCharging = this.getMeasurement(sensorData, 'batteryCharging');
 
     const lowBatteryStatus = this.mapLowBatteryStatus(batteryLow, batteryLevel);
     const chargingState = this.mapChargingState(batteryCharging);

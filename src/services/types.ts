@@ -12,6 +12,6 @@ export interface ServiceDefinition {
 }
 
 export interface ServiceHandlerClass {
-  new (api: API, log: Logger, service: Service, options?: ServiceOptions): ServiceHandler;
-  matches(sensorData: BTHomeSensorData): boolean;
+  new (api: API, log: Logger, service: Service, position: number, options?: ServiceOptions): ServiceHandler;
+  matches(sensorData: BTHomeSensorData): number;
 }

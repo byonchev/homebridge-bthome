@@ -159,61 +159,61 @@ export class BTHomeDevice {
 
         // Battery characteristics
         case 0x01:
-          result.batteryLevel = data.readUInt8(offset + 1);
+          this.pushMeasurement(result, 'batteryLevel', data.readUInt8(offset + 1));
           offset += 2;
           break;
         case 0x15:
-          result.batteryLow = data.readUInt8(offset + 1) === 1;
+          this.pushMeasurement(result, 'batteryLow', this.readBool(data, offset + 1));
           offset += 2;
           break;
         case 0x16:
-          result.batteryCharging = data.readUInt8(offset + 1) === 1;
+          this.pushMeasurement(result, 'batteryCharging', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
         // Temperature (°C)
         case 0x02:
-          result.temperature = data.readInt16LE(offset + 1) / 100;
+          this.pushMeasurement(result, 'temperature', data.readInt16LE(offset + 1) / 100);
           offset += 3;
           break;
         case 0x45:
-          result.temperature = data.readInt16LE(offset + 1) / 10;
+          this.pushMeasurement(result, 'temperature', data.readInt16LE(offset + 1) / 10);
           offset += 3;
           break;
         case 0x58:
-          result.temperature = (data.readInt8(offset + 1) * 100) / 35;
+          this.pushMeasurement(result, 'temperature', (data.readInt8(offset + 1) * 100) / 35);
           offset += 2;
           break;
         case 0x57:
-          result.temperature = data.readInt8(offset + 1);
+          this.pushMeasurement(result, 'temperature', data.readInt8(offset + 1));
           offset += 2;
           break;
 
         // Humidity (%)
         case 0x03:
-          result.humidity = data.readUInt16LE(offset + 1) / 100;
+          this.pushMeasurement(result, 'humidity', data.readUInt16LE(offset + 1) / 100);
           offset += 3;
           break;
         case 0x2e:
-          result.humidity = data.readUInt8(offset + 1);
+          this.pushMeasurement(result, 'humidity', data.readUInt8(offset + 1));
           offset += 2;
           break;
 
         // Button event
         case 0x3a:
-          result.button = this.decodeButtonEvent(data.readUint8(offset + 1));
+          this.pushMeasurement(result, 'button', this.decodeButtonEvent(data.readUint8(offset + 1)));
           offset += 2;
           break;
 
         // Illuminance level (lux)
         case 0x05:
-          result.illuminance = (data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16)) / 100;
+          this.pushMeasurement(result, 'illuminance', this.readUInt24LE(data, offset + 1) / 100);
           offset += 4;
           break;
 
         // Motion detected
         case 0x21:
-          result.motionDetected = data.readUint8(offset + 1) === 1;
+          this.pushMeasurement(result, 'motionDetected', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
@@ -221,49 +221,49 @@ export class BTHomeDevice {
         case 0x1a:
         case 0x1b:
         case 0x2d:
-          result.contactDetected = data.readUint8(offset + 1) === 1;
+          this.pushMeasurement(result, 'contactDetected', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
         // Occupancy detected
         case 0x23:
-          result.occupancyDetected = data.readUint8(offset + 1) === 1;
+          this.pushMeasurement(result, 'occupancyDetected', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
         // Carbon monoxide detected
         case 0x17:
-          result.carbonMonoxideDetected = data.readUint8(offset + 1) === 1;
+          this.pushMeasurement(result, 'carbonMonoxideDetected', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
         // Smoke detected
         case 0x29:
-          result.smokeDetected = data.readUint8(offset + 1) === 1;
+          this.pushMeasurement(result, 'smokeDetected', this.readBool(data, offset + 1));
           offset += 2;
           break;
 
         // Carbon dioxide concentration (ppm)
         case 0x12:
-          result.carbonDioxideLevel = data.readUInt16LE(offset + 1);
+          this.pushMeasurement(result, 'carbonDioxideLevel', data.readUInt16LE(offset + 1));
           offset += 3;
           break;
 
         // Particulate matter 2.5uM (ug/m3)
         case 0x0d:
-          result.pm25Density = data.readUInt16LE(offset + 1);
+          this.pushMeasurement(result, 'pm25Density', data.readUInt16LE(offset + 1));
           offset += 3;
           break;
 
         // Particulate matter 10uM (ug/m3)
         case 0x0e:
-          result.pm10Density = data.readUInt16LE(offset + 1);
+          this.pushMeasurement(result, 'pm10Density', data.readUInt16LE(offset + 1));
           offset += 3;
           break;
 
         // Volatile organic compounds (ug/m3)
         case 0x13:
-          result.vocDensity = data.readUInt16LE(offset + 1);
+          this.pushMeasurement(result, 'vocDensity', data.readUInt16LE(offset + 1));
           offset += 3;
           break;
 
@@ -380,5 +380,25 @@ export class BTHomeDevice {
 
         return ButtonEvent.None;
     }
+  }
+
+  private readUInt24LE(data: Buffer, offset: number): number {
+    return data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16);
+  }
+
+  private readBool(data: Buffer, offset: number): boolean {
+    return data.readUint8(offset) === 1;
+  }
+
+  private pushMeasurement<K extends keyof BTHomeSensorData>(
+    data: BTHomeSensorData,
+    key: K,
+    value: BTHomeSensorData[K] extends (infer U)[] | undefined ? U : never,
+  ) {
+    if (data[key] === undefined) {
+      (data[key] as unknown) = [];
+    }
+
+    (data[key] as unknown as unknown[]).push(value);
   }
 }

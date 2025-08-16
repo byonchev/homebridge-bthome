@@ -22,12 +22,12 @@ export class AirQualityHandler extends ServiceHandler {
     inferior: 3,
   };
 
-  public static matches(sensorData: BTHomeSensorData): boolean {
-    return (
-      sensorData.pm25Density !== undefined ||
-      sensorData.pm10Density !== undefined ||
-      sensorData.vocDensity !== undefined
-    );
+  public static matches(sensorData: BTHomeSensorData): number {
+    const pm25Densities = (sensorData.pm25Density ?? []).length;
+    const pm10Densities = (sensorData.pm10Density ?? []).length;
+    const vocDensities = (sensorData.vocDensity ?? []).length;
+
+    return Math.max(pm25Densities, pm10Densities, vocDensities);
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
@@ -46,22 +46,26 @@ export class AirQualityHandler extends ServiceHandler {
 
     const airQualityIndicators = [this.Characteristic.AirQuality.UNKNOWN];
 
-    if (sensorData.pm25Density !== undefined) {
-      this.service.getCharacteristic(this.Characteristic.PM2_5Density).updateValue(sensorData.pm25Density);
+    const pm25Density = this.getMeasurement(sensorData, 'pm25Density');
+    const pm10Density = this.getMeasurement(sensorData, 'pm10Density');
+    const vocDensity = this.getMeasurement(sensorData, 'vocDensity');
 
-      airQualityIndicators.push(this.calculateAirQuality(sensorData.pm25Density, pm25Breakpoints));
+    if (pm25Density !== undefined) {
+      this.service.getCharacteristic(this.Characteristic.PM2_5Density).updateValue(pm25Density);
+
+      airQualityIndicators.push(this.calculateAirQuality(pm25Density, pm25Breakpoints));
     }
 
-    if (sensorData.pm10Density !== undefined) {
-      this.service.getCharacteristic(this.Characteristic.PM10Density).updateValue(sensorData.pm10Density);
+    if (pm10Density !== undefined) {
+      this.service.getCharacteristic(this.Characteristic.PM10Density).updateValue(pm10Density);
 
-      airQualityIndicators.push(this.calculateAirQuality(sensorData.pm10Density, pm10Breakpoints));
+      airQualityIndicators.push(this.calculateAirQuality(pm10Density, pm10Breakpoints));
     }
 
-    if (sensorData.vocDensity !== undefined) {
-      this.service.getCharacteristic(this.Characteristic.VOCDensity).updateValue(sensorData.vocDensity);
+    if (vocDensity !== undefined) {
+      this.service.getCharacteristic(this.Characteristic.VOCDensity).updateValue(vocDensity);
 
-      airQualityIndicators.push(this.calculateAirQuality(sensorData.vocDensity, vocBreakpoints));
+      airQualityIndicators.push(this.calculateAirQuality(vocDensity, vocBreakpoints));
     }
 
     const airQuality = Math.max(...airQualityIndicators);

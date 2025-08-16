@@ -4,17 +4,18 @@ import { ServiceHandler } from './base.js';
 export class CarbonDioxideHandler extends ServiceHandler {
   private static readonly DEFAULT_THRESHOLD = 1000;
 
-  public static matches(sensorData: BTHomeSensorData): boolean {
-    return sensorData.carbonDioxideLevel !== undefined;
+  public static matches(sensorData: BTHomeSensorData): number {
+    return (sensorData.carbonDioxideLevel ?? []).length;
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
+    const carbonDioxideLevel = this.getMeasurement(sensorData, 'carbonDioxideLevel');
     const threshold = this.options?.carbonDioxide?.threshold ?? CarbonDioxideHandler.DEFAULT_THRESHOLD;
 
-    if (sensorData.carbonDioxideLevel !== undefined) {
-      this.service.getCharacteristic(this.Characteristic.CarbonDioxideLevel).updateValue(sensorData.carbonDioxideLevel);
+    if (carbonDioxideLevel !== undefined) {
+      this.service.getCharacteristic(this.Characteristic.CarbonDioxideLevel).updateValue(carbonDioxideLevel);
 
-      const detected = sensorData.carbonDioxideLevel > threshold;
+      const detected = carbonDioxideLevel > threshold;
 
       this.service.getCharacteristic(this.Characteristic.CarbonDioxideDetected).updateValue(detected);
     }
