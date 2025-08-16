@@ -44,7 +44,7 @@ export class ServiceManager {
     this.options = options;
 
     if (!this.autoDiscovery) {
-      this.configureServices(config?.enabled || []);
+      this.configureServices(config?.enabled || {});
     }
   }
 
@@ -68,18 +68,24 @@ export class ServiceManager {
     });
   }
 
-  private configureServices(types: ServiceType[]) {
+  private configureServices(types: Partial<Record<ServiceType, number>>) {
     const existingServices = [...this.accessory.services];
 
-    types.push('information');
+    types.information = 1;
 
-    types.forEach(type => {
-      const service = this.configureService(type);
+    Object.entries(types).forEach(([type, count]) => {
+      if (count <= 0) {
+        return;
+      }
 
-      const serviceIndex = existingServices.findIndex(existingService => existingService === service);
+      for (let position = 0; position < count; position++) {
+        const service = this.configureService(type as ServiceType, position + 1);
 
-      if (serviceIndex !== -1) {
-        existingServices.splice(serviceIndex, 1);
+        const serviceIndex = existingServices.findIndex(existingService => existingService === service);
+
+        if (serviceIndex !== -1) {
+          existingServices.splice(serviceIndex, 1);
+        }
       }
     });
 

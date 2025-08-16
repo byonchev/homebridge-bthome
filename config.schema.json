@@ -85,41 +85,94 @@
                 },
                 "enabled": {
                   "title": "Enabled Services",
-                  "description": "Select which services to create for this device when auto-discovery is disabled.",
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "airQuality",
-                      "battery",
-                      "button",
-                      "carbonDioxide",
-                      "carbonMonoxide",
-                      "contact",
-                      "humidity",
-                      "illuminance",
-                      "motion",
-                      "occupancy",
-                      "smoke",
-                      "temperature"
-                    ],
-                    "enumNames": [
-                      "Air Quality Sensor",
-                      "Battery Indicator",
-                      "Stateless Switch",
-                      "Carbon Dioxide Sensor",
-                      "Carbon Monoxide Sensor",
-                      "Contact Sensor",
-                      "Humidity Sensor",
-                      "Light Sensor",
-                      "Motion Sensor",
-                      "Occupancy Sensor",
-                      "Smoke Sensor",
-                      "Temperature Sensor"
-                    ]
+                  "description": "Select how many services of any supported type to create for this device when auto-discovery is disabled.",
+                  "type": "object",
+                  "properties": {
+                    "airQuality": {
+                      "title": "Air Quality Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "battery": {
+                      "title": "Battery Indicators",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "button": {
+                      "title": "Stateless Switches",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "carbonDioxide": {
+                      "title": "Carbon Dioxide Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "carbonMonoxide": {
+                      "title": "Carbon Monoxide Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "contact": {
+                      "title": "Contact Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "humidity": {
+                      "title": "Humidity Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "illuminance": {
+                      "title": "Light Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "motion": {
+                      "title": "Motion Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "occupancy": {
+                      "title": "Occupancy Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "smoke": {
+                      "title": "Smoke Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    },
+                    "temperature": {
+                      "title": "Temperature Sensors",
+                      "type": "integer",
+                      "minimum": 0,
+                      "placeholder": 0,
+                      "widget": "updown"
+                    }
                   },
-                  "uniqueItems": true,
-                  "format": "checkbox",
                   "condition": {
                     "functionBody": "return model.devices && model.devices[arrayIndices] && model.devices[arrayIndices].services && model.devices[arrayIndices].services.autoDiscovery === false;"
                   }

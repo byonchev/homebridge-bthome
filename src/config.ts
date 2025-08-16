@@ -24,7 +24,7 @@ export interface AirQualityBreakpoints {
 
 export interface ServicesConfig {
   autoDiscovery?: boolean;
-  enabled?: ServiceType[];
+  enabled?: Partial<Record<ServiceType, number>>;
 }
 
 export interface DeviceConfig {

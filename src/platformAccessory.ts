@@ -4,6 +4,7 @@ import type { BTHomePlatform } from './platform.js';
 import { BTHomeDevice } from './bthome/index.js';
 import { BTHomeSensorData } from './bthome/types.js';
 import { ServiceManager } from './services/index.js';
+import { DeviceConfig } from './config.js';
 
 export class BTHomeAccessory {
   private readonly device: BTHomeDevice;
@@ -15,6 +16,7 @@ export class BTHomeAccessory {
     private readonly accessory: PlatformAccessory,
   ) {
     this.device = this.getDevice();
+
     const manufacturerData = this.device.getManufacturerData();
 
     this.accessory
@@ -23,13 +25,9 @@ export class BTHomeAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
-    this.services = new ServiceManager(
-      accessory,
-      platform.api,
-      platform.log,
-      platform.config.services,
-      platform.config.options,
-    );
+    const config = this.getDeviceConfiguration();
+
+    this.services = new ServiceManager(accessory, platform.api, platform.log, config.services, platform.config.options);
 
     this.device.onUpdate(this.onDeviceUpdate.bind(this));
   }
@@ -49,5 +47,14 @@ export class BTHomeAccessory {
     }
 
     return device;
+  }
+
+  private getDeviceConfiguration(): DeviceConfig {
+    const config = this.accessory.context.config;
+    if (!config) {
+      throw new Error('Device configuration is not set in the accessory context');
+    }
+
+    return config;
   }
 }
