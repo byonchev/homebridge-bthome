@@ -14,9 +14,6 @@ Homebridge plugin for integrating BTHome devices into HomeKit
 
 It works locally — no gateways or cloud services are required. The plugin connects directly to supported devices.
 
-> **Note:** This project is in active early development and currently supports a limited set of sensor types.  
-> See the [Supported Features](#supported_features) section for details.
-
 ### Prerequisites
 
 To utilize this plugin, ensure that:
@@ -35,15 +32,20 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 
 ### Supported Sensor Types
 
-- Temperature
-- Relative Humidity
+- Air Quality (PM2.5, PM10 and VOC)
 - Battery Level
 - Push Button
+- Carbon Dioxide Levels
+- Carbon Monoxide Detection
+- Contact Detection
+- Relative Humidity
 - Illuminance
-- Motion detection
-- Contact detection
+- Motion Detection
+- Occupancy Detection
+- Smoke Detection
+- Temperature
 
-### Supported devices
+### Supported Devices
 
 This is a list of devices that should work with this plugin. Some of them aren't tested (see table below).
 
@@ -52,11 +54,12 @@ If you own some of the untested devices and the plugin works for you, please let
 | Device                 | Tested             |
 | ---------------------- | ------------------ |
 | Shelly BLU H&T         | :heavy_check_mark: |
+| Shelly BLU Motion      | :heavy_check_mark: |
 | Shelly BLU Button      | :x:                |
 | Shelly BLU Wall Switch | :x:                |
 | Shelly BLU RC Button   | :x:                |
-| Shelly BLU Motion      | :heavy_check_mark: |
 | Shelly BLU Door/Window | :x:                |
+| Shelly BLU TRV         | :x:                |
 
 <a id="supported_features"></a>
 
@@ -65,8 +68,10 @@ If you own some of the untested devices and the plugin works for you, please let
 | Feature                               | Support Status     |
 | ------------------------------------- | ------------------ |
 | Encryption                            | :heavy_check_mark: |
+| Multiple Sensor Readings of Same Type | :heavy_check_mark: |
 | Multiple Bluetooth Devices\*          | :x:                |
-| Multiple Sensor Readings of Same Type | :x:                |
+| EVE Services & Characteristics        | :x:                |
+| Fakegato                              | :x:                |
 
 #### Notes:
 
