@@ -3,16 +3,18 @@ import { BTHomeSensorData } from '../bthome/types.js';
 import { ServiceHandler } from './base.js';
 
 export class ContactHandler extends ServiceHandler {
-  public static matches(sensorData: BTHomeSensorData): boolean {
-    return sensorData.contactDetected !== undefined;
+  public static matches(sensorData: BTHomeSensorData): number {
+    return (sensorData.contactDetected ?? []).length;
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
-    if (sensorData.contactDetected === undefined) {
+    const contactDetected = this.getMeasurement(sensorData, 'contactDetected');
+
+    if (contactDetected === undefined) {
       return;
     }
 
-    const state = this.mapState(sensorData.contactDetected);
+    const state = this.mapState(contactDetected);
 
     this.service.getCharacteristic(this.Characteristic.ContactSensorState).updateValue(state);
   }

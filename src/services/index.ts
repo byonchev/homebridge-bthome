@@ -60,8 +60,10 @@ export class ServiceManager {
 
   private discoverServices(sensorData: BTHomeSensorData) {
     Object.values(this.definitions).forEach(({ type, handlerClass: handler }) => {
-      if (handler.matches(sensorData)) {
-        this.configureService(type);
+      const matches = handler.matches(sensorData);
+
+      for (let position = 0; position < matches; position++) {
+        this.configureService(type, position + 1);
       }
     });
   }
@@ -88,28 +90,29 @@ export class ServiceManager {
     });
   }
 
-  private configureService(type: ServiceType): Service {
+  private configureService(type: ServiceType, position: number = 1): Service {
     const serviceDefinition = this.definitions[type];
 
     if (!serviceDefinition) {
       throw new Error(`No service definition found for type: ${type}`);
     }
 
-    const service = this.upsertService(serviceDefinition.serviceClass);
+    const serviceClass = serviceDefinition.serviceClass;
+    const service = this.upsertService(serviceClass, position);
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
-      this.handlers.set(handlerKey, new serviceDefinition.handlerClass(this.api, this.log, service, this.options));
+      const handler = new serviceDefinition.handlerClass(this.api, this.log, service, position, this.options);
 
-      this.log.debug(
-        `[${this.accessory.displayName}] Created handler for ${serviceDefinition.serviceClass.name} service`,
-      );
+      this.handlers.set(handlerKey, handler);
+
+      this.log.debug(`[${this.accessory.displayName}] Created handler #${position} for ${serviceClass.name} service`);
     }
 
     return service;
   }
 
-  private upsertService(serviceClass: ServiceClass, position: number = 1): Service {
+  private upsertService(serviceClass: ServiceClass, position: number): Service {
     const subType = this.getServiceSubType(serviceClass, position);
     const name = this.accessory.displayName;
 

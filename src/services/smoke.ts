@@ -2,13 +2,15 @@ import { BTHomeSensorData } from '../bthome/types.js';
 import { ServiceHandler } from './base.js';
 
 export class SmokeHandler extends ServiceHandler {
-  public static matches(sensorData: BTHomeSensorData): boolean {
-    return sensorData.smokeDetected !== undefined;
+  public static matches(sensorData: BTHomeSensorData): number {
+    return (sensorData.smokeDetected ?? []).length;
   }
 
   public updateValues(sensorData: BTHomeSensorData) {
-    if (sensorData.smokeDetected !== undefined) {
-      this.service.getCharacteristic(this.Characteristic.SmokeDetected).updateValue(sensorData.smokeDetected);
+    const smokeDetected = this.getMeasurement(sensorData, 'smokeDetected');
+
+    if (smokeDetected !== undefined) {
+      this.service.getCharacteristic(this.Characteristic.SmokeDetected).updateValue(smokeDetected);
     }
   }
 }
