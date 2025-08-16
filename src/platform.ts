@@ -147,7 +147,6 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
 
   private setAccessoryContext(accessory: PlatformAccessory, config: DeviceConfig, advertisment: BluetoothAdvertisment) {
     accessory.context.device = new BTHomeDevice(advertisment, this.log, config.encryptionKey);
-    accessory.context.services = config.services || { autoDiscovery: true };
   }
 
   private generateUUID(mac: string): string {

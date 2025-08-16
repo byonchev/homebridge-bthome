@@ -1,15 +1,17 @@
 import type { PlatformConfig } from 'homebridge';
 
 export type ServiceType =
-  | 'information'
-  | 'temperature'
-  | 'humidity'
+  | 'airQuality'
   | 'battery'
-  | 'illuminance'
   | 'button'
-  | 'motion'
+  | 'carbonDioxide'
+  | 'carbonMonoxide'
   | 'contact'
-  | 'airQuality';
+  | 'humidity'
+  | 'illuminance'
+  | 'information'
+  | 'motion'
+  | 'temperature';
 
 export interface AirQualityBreakpoints {
   excellent: number;
@@ -42,6 +44,9 @@ export interface ServiceOptions {
     pm25Breakpoints?: AirQualityBreakpoints;
     pm10Breakpoints?: AirQualityBreakpoints;
     vocBreakpoints?: AirQualityBreakpoints;
+  };
+  carbonDioxide?: {
+    threshold?: number;
   };
 }
 
