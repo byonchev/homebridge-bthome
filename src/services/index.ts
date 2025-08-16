@@ -12,6 +12,7 @@ import { ContactHandler } from './contact.js';
 import { InformationHandler } from './information.js';
 import { ServiceClass, ServiceDefinition } from './types.js';
 import { ServiceHandler } from './base.js';
+import { AirQualityHandler } from './air_quality.js';
 
 export class ServiceManager {
   private readonly api: API;
@@ -171,6 +172,11 @@ export class ServiceManager {
         type: 'contact',
         serviceClass: Service.ContactSensor,
         handlerClass: ContactHandler,
+      },
+      {
+        type: 'airQuality',
+        serviceClass: Service.AirQualitySensor,
+        handlerClass: AirQualityHandler,
       },
     ];
 
