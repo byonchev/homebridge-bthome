@@ -1,6 +1,6 @@
 import { API, Service } from 'homebridge';
 import { Logger, PlatformAccessory } from 'homebridge';
-import { ServiceOptions, ServicesConfig, ServiceType } from '../config.js';
+import { ServiceOptions, ServicesConfig as ServiceConfig, ServiceType } from '../config.js';
 import { BTHomeSensorData } from '../bthome/types.js';
 import { TemperatureHandler } from './temperature.js';
 import { HumidityHandler } from './humidity.js';
@@ -13,6 +13,7 @@ import { InformationHandler } from './information.js';
 import { ServiceClass, ServiceDefinition } from './types.js';
 import { ServiceHandler } from './base.js';
 import { AirQualityHandler } from './air_quality.js';
+import { CarbonDioxideHandler } from './carbon_dioxide.js';
 
 export class ServiceManager {
   private readonly api: API;
@@ -27,7 +28,7 @@ export class ServiceManager {
     accessory: PlatformAccessory,
     api: API,
     logger: Logger,
-    config?: ServicesConfig,
+    config?: ServiceConfig,
     options?: ServiceOptions,
   ) {
     this.accessory = accessory;
@@ -134,19 +135,9 @@ export class ServiceManager {
 
     const definitions: Array<ServiceDefinition> = [
       {
-        type: 'information',
-        serviceClass: Service.AccessoryInformation,
-        handlerClass: InformationHandler,
-      },
-      {
-        type: 'temperature',
-        serviceClass: Service.TemperatureSensor,
-        handlerClass: TemperatureHandler,
-      },
-      {
-        type: 'humidity',
-        serviceClass: Service.HumiditySensor,
-        handlerClass: HumidityHandler,
+        type: 'airQuality',
+        serviceClass: Service.AirQualitySensor,
+        handlerClass: AirQualityHandler,
       },
       {
         type: 'battery',
@@ -154,19 +145,14 @@ export class ServiceManager {
         handlerClass: BatteryHandler,
       },
       {
-        type: 'illuminance',
-        serviceClass: Service.LightSensor,
-        handlerClass: IlluminanceHandler,
-      },
-      {
         type: 'button',
         serviceClass: Service.StatelessProgrammableSwitch,
         handlerClass: ButtonHandler,
       },
       {
-        type: 'motion',
-        serviceClass: Service.MotionSensor,
-        handlerClass: MotionHandler,
+        type: 'carbonDioxide',
+        serviceClass: Service.CarbonDioxideSensor,
+        handlerClass: CarbonDioxideHandler,
       },
       {
         type: 'contact',
@@ -174,9 +160,29 @@ export class ServiceManager {
         handlerClass: ContactHandler,
       },
       {
-        type: 'airQuality',
-        serviceClass: Service.AirQualitySensor,
-        handlerClass: AirQualityHandler,
+        type: 'humidity',
+        serviceClass: Service.HumiditySensor,
+        handlerClass: HumidityHandler,
+      },
+      {
+        type: 'illuminance',
+        serviceClass: Service.LightSensor,
+        handlerClass: IlluminanceHandler,
+      },
+      {
+        type: 'information',
+        serviceClass: Service.AccessoryInformation,
+        handlerClass: InformationHandler,
+      },
+      {
+        type: 'motion',
+        serviceClass: Service.MotionSensor,
+        handlerClass: MotionHandler,
+      },
+      {
+        type: 'temperature',
+        serviceClass: Service.TemperatureSensor,
+        handlerClass: TemperatureHandler,
       },
     ];
 

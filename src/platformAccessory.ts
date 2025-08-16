@@ -3,7 +3,6 @@ import type { PlatformAccessory } from 'homebridge';
 import type { BTHomePlatform } from './platform.js';
 import { BTHomeDevice } from './bthome/index.js';
 import { BTHomeSensorData } from './bthome/types.js';
-import { ServicesConfig } from './config.js';
 import { ServiceManager } from './services/index.js';
 
 export class BTHomeAccessory {
@@ -24,7 +23,13 @@ export class BTHomeAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
-    this.services = new ServiceManager(accessory, platform.api, platform.log, this.getServiceConfiguration());
+    this.services = new ServiceManager(
+      accessory,
+      platform.api,
+      platform.log,
+      platform.config.services,
+      platform.config.options,
+    );
 
     this.device.onUpdate(this.onDeviceUpdate.bind(this));
   }
@@ -44,14 +49,5 @@ export class BTHomeAccessory {
     }
 
     return device;
-  }
-
-  private getServiceConfiguration(): ServicesConfig {
-    const config = this.accessory.context.services;
-    if (!config) {
-      throw new Error('Accessory service configuration is not set in the context');
-    }
-
-    return config;
   }
 }

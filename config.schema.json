@@ -74,11 +74,11 @@
             },
             "services": {
               "type": "object",
-              "title": "Services",
+              "title": "Capabilities",
               "properties": {
                 "autoDiscovery": {
                   "title": "Auto-Discovery",
-                  "description": "Automatically detects the supported services of this device based on the data it reports.",
+                  "description": "Automatically detects the supported capabilities of this device based on the data it reports.",
                   "type": "boolean",
                   "default": true,
                   "required": false
@@ -93,6 +93,8 @@
                       "airQuality",
                       "battery",
                       "button",
+                      "carbonDioxide",
+                      "carbonMonoxide",
                       "contact",
                       "humidity",
                       "illuminance",
@@ -103,6 +105,8 @@
                       "Air Quality Sensor",
                       "Battery Indicator",
                       "Stateless Switch",
+                      "Carbon Dioxide Sensor",
+                      "Carbon Monoxide Sensor",
                       "Contact Sensor",
                       "Humidity Sensor",
                       "Light Sensor",
@@ -157,6 +161,20 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 100,
+                "widget": "updown"
+              }
+            }
+          },
+          "carbonDioxide": {
+            "type": "object",
+            "title": "Carbon Dioxide",
+            "properties": {
+              "threshold": {
+                "title": "Detection Threshold",
+                "description": "Threshold level above which the device will show as 'CO2 Detected' (ppm).",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000,
                 "widget": "updown"
               }
             }
