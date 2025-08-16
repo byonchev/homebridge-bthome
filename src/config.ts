@@ -8,21 +8,19 @@ export type ServiceType =
   | 'illuminance'
   | 'button'
   | 'motion'
-  | 'contact';
+  | 'contact'
+  | 'airQuality';
 
-export interface ServiceOptions {
-  lowBatteryThreshold?: number;
-  position?: number;
-}
-
-export interface ServiceConfig {
-  type: ServiceType;
-  options?: ServiceOptions;
+export interface AirQualityBreakpoints {
+  excellent: number;
+  good: number;
+  fair: number;
+  inferior: number;
 }
 
 export interface ServicesConfig {
   autoDiscovery?: boolean;
-  enabled?: ServiceConfig[];
+  enabled?: ServiceType[];
 }
 
 export interface DeviceConfig {
@@ -36,7 +34,19 @@ export interface BluetoothConfig {
   powerOnTimeout?: number;
 }
 
+export interface ServiceOptions {
+  battery?: {
+    lowBatteryThreshold?: number;
+  };
+  airQuality?: {
+    pm25Breakpoints?: AirQualityBreakpoints;
+    pm10Breakpoints?: AirQualityBreakpoints;
+    vocBreakpoints?: AirQualityBreakpoints;
+  };
+}
+
 export interface BTHomePlatformConfig extends PlatformConfig {
   devices?: DeviceConfig[];
+  options?: ServiceOptions;
   bluetooth?: BluetoothConfig;
 }

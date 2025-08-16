@@ -5,6 +5,34 @@
   "strictValidation": false,
   "schema": {
     "type": "object",
+    "definitions": {
+      "AirQualityBreakpoints": {
+        "type": "object",
+        "expandable": true,
+        "properties": {
+          "excellent": {
+            "title": "Excellent",
+            "description": "Value below which the air quality is considered excellent (µg/m³)",
+            "type": "number"
+          },
+          "good": {
+            "title": "Good",
+            "description": "Value below which the air quality is considered good (µg/m³)",
+            "type": "number"
+          },
+          "fair": {
+            "title": "Fair",
+            "description": "Value below which the air quality is considered fair (µg/m³)",
+            "type": "number"
+          },
+          "inferior": {
+            "title": "Inferior",
+            "description": "Value below which the air quality is considered inferior (µg/m³)",
+            "type": "number"
+          }
+        }
+      }
+    },
     "properties": {
       "name": {
         "title": "Plugin Name",
@@ -50,84 +78,40 @@
               "properties": {
                 "autoDiscovery": {
                   "title": "Auto-Discovery",
-                  "description": "Automatically detect the services of this device based on data received.",
+                  "description": "Automatically detects the supported services of this device based on the data it reports.",
                   "type": "boolean",
                   "default": true,
                   "required": false
                 },
                 "enabled": {
                   "title": "Enabled Services",
-                  "description": "Manually specify which services to create for this device when auto-discovery is disabled.",
-                  "expandable": true,
-                  "expanded": true,
+                  "description": "Select which services to create for this device when auto-discovery is disabled.",
                   "type": "array",
-                  "minItems": 1,
-                  "default": [
-                    {
-                      "type": "battery"
-                    }
-                  ],
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "title": "Service Type",
-                        "type": "string",
-                        "oneOf": [
-                          {
-                            "title": "Temperature Sensor",
-                            "const": "temperature"
-                          },
-                          {
-                            "title": "Humidity Sensor",
-                            "const": "humidity"
-                          },
-                          {
-                            "title": "Battery",
-                            "const": "battery"
-                          },
-                          {
-                            "title": "Light Sensor",
-                            "const": "illuminance"
-                          },
-                          {
-                            "title": "Stateless Switch",
-                            "const": "button"
-                          },
-                          {
-                            "title": "Motion Sensor",
-                            "const": "motion"
-                          },
-                          {
-                            "title": "Contact Sensor",
-                            "const": "contact"
-                          }
-                        ],
-                        "required": true
-                      },
-                      "options": {
-                        "type": "object",
-                        "properties": {
-                          "lowBatteryThreshold": {
-                            "title": "Low Battery Threshold",
-                            "description": "Battery percentage below which the device will show as 'Low Battery' (if device reports battery level)",
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 100,
-                            "widget": "updown",
-                            "placeholder": "10",
-                            "condition": {
-                              "functionBody": "return model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].type === 'battery';"
-                            },
-                            "required": false
-                          }
-                        },
-                        "condition": {
-                          "functionBody": "const service = model.devices && model.devices[arrayIndices[0]] && model.devices[arrayIndices[0]].services && model.devices[arrayIndices[0]].services.enabled && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]] && model.devices[arrayIndices[0]].services.enabled[arrayIndices[1]].type; return service === 'battery';"
-                        }
-                      }
-                    }
+                    "type": "string",
+                    "enum": [
+                      "temperature",
+                      "humidity",
+                      "battery",
+                      "illuminance",
+                      "button",
+                      "motion",
+                      "contact",
+                      "airQuality"
+                    ],
+                    "enumNames": [
+                      "Temperature",
+                      "Humidity",
+                      "Battery",
+                      "Illuminance",
+                      "Button",
+                      "Motion",
+                      "Contact",
+                      "Air Quality"
+                    ]
                   },
+                  "uniqueItems": true,
+                  "format": "checkbox",
                   "condition": {
                     "functionBody": "return model.devices && model.devices[arrayIndices] && model.devices[arrayIndices].services && model.devices[arrayIndices].services.autoDiscovery === false;"
                   }
@@ -137,9 +121,52 @@
           }
         }
       },
-      "bluetooth": {
-        "title": "Bluetooth Configuration",
+      "options": {
         "type": "object",
+        "title": "Service Options",
+        "expandable": true,
+        "properties": {
+          "airQuality": {
+            "type": "object",
+            "title": "Air Quality",
+            "properties": {
+              "pm25Breakpoints": {
+                "$ref": "#/definitions/AirQualityBreakpoints",
+                "title": "PM2.5 Breakpoints",
+                "description": "Thresholds for PM2.5 levels to determine air quality categories (µg/m³)"
+              },
+              "pm10Breakpoints": {
+                "$ref": "#/definitions/AirQualityBreakpoints",
+                "title": "PM10 Breakpoints",
+                "description": "Thresholds for PM10 levels to determine air quality categories (µg/m³)"
+              },
+              "vocBreakpoints": {
+                "$ref": "#/definitions/AirQualityBreakpoints",
+                "title": "VOC Breakpoints",
+                "description": "Thresholds for VOC levels to determine air quality categories (µg/m³)"
+              }
+            }
+          },
+          "battery": {
+            "type": "object",
+            "title": "Battery",
+            "properties": {
+              "lowBatteryThreshold": {
+                "title": "Low Battery Threshold",
+                "description": "Battery percentage below which the device will show as 'Low Battery' (if the device reports the battery level).<br/>Configuring this overrides any 'Low Battery' reports from the device (if available).",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "widget": "updown"
+              }
+            }
+          }
+        }
+      },
+      "bluetooth": {
+        "type": "object",
+        "title": "Bluetooth Configuration",
+        "expandable": true,
         "properties": {
           "powerOnTimeout": {
             "title": "Bluetooth Power-On Timeout",

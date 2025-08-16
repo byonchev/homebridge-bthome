@@ -31,7 +31,7 @@ export class BatteryHandler extends ServiceHandler {
   }
 
   private mapLowBatteryStatus(reportedLow?: boolean, reportedLevel?: number): CharacteristicValue {
-    const threshold = this.options?.lowBatteryThreshold;
+    const threshold = this.options?.battery?.lowBatteryThreshold;
 
     if (reportedLevel !== undefined && threshold !== undefined && reportedLevel < threshold) {
       return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;

@@ -1,6 +1,6 @@
 import { API, Service } from 'homebridge';
 import { Logger, PlatformAccessory } from 'homebridge';
-import { ServiceConfig, ServicesConfig, ServiceType } from '../config.js';
+import { ServiceOptions, ServicesConfig, ServiceType } from '../config.js';
 import { BTHomeSensorData } from '../bthome/types.js';
 import { TemperatureHandler } from './temperature.js';
 import { HumidityHandler } from './humidity.js';
@@ -19,9 +19,16 @@ export class ServiceManager {
   private readonly autoDiscovery: boolean;
   private readonly definitions: Record<ServiceType, ServiceDefinition>;
   private readonly handlers: Map<string, ServiceHandler> = new Map();
+  private readonly options?: ServiceOptions;
   private readonly log: Logger;
 
-  constructor(accessory: PlatformAccessory, api: API, logger: Logger, config?: ServicesConfig) {
+  constructor(
+    accessory: PlatformAccessory,
+    api: API,
+    logger: Logger,
+    config?: ServicesConfig,
+    options?: ServiceOptions,
+  ) {
     this.accessory = accessory;
 
     this.api = api;
@@ -29,6 +36,7 @@ export class ServiceManager {
 
     this.autoDiscovery = config?.autoDiscovery !== false;
     this.definitions = this.createServiceDefinitions();
+    this.options = options;
 
     if (!this.autoDiscovery) {
       this.configureServices(config?.enabled || []);
@@ -48,18 +56,18 @@ export class ServiceManager {
   private discoverServices(sensorData: BTHomeSensorData) {
     Object.values(this.definitions).forEach(({ type, handlerClass: handler }) => {
       if (handler.matches(sensorData)) {
-        this.configureService({ type });
+        this.configureService(type);
       }
     });
   }
 
-  private configureServices(configs: ServiceConfig[]) {
+  private configureServices(types: ServiceType[]) {
     const existingServices = [...this.accessory.services];
 
-    configs.push({ type: 'information' });
+    types.push('information');
 
-    configs.forEach(config => {
-      const service = this.configureService(config);
+    types.forEach(type => {
+      const service = this.configureService(type);
 
       const serviceIndex = existingServices.findIndex(existingService => existingService === service);
 
@@ -75,25 +83,21 @@ export class ServiceManager {
     });
   }
 
-  private configureService(config: ServiceConfig) {
-    const serviceDefinition = this.definitions[config.type];
+  private configureService(type: ServiceType): Service {
+    const serviceDefinition = this.definitions[type];
 
     if (!serviceDefinition) {
-      throw new Error(`No service definition found for type: ${config.type}`);
+      throw new Error(`No service definition found for type: ${type}`);
     }
 
-    const options = config.options || {};
-
-    const service = this.upsertService(serviceDefinition.serviceClass, options.position);
+    const service = this.upsertService(serviceDefinition.serviceClass);
     const handlerKey = service.subtype || service.UUID;
 
     if (!this.handlers.has(handlerKey)) {
-      this.handlers.set(handlerKey, new serviceDefinition.handlerClass(this.api, this.log, service, options));
+      this.handlers.set(handlerKey, new serviceDefinition.handlerClass(this.api, this.log, service, this.options));
 
       this.log.debug(
-        `[${this.accessory.displayName}]` +
-          ` Created handler for ${serviceDefinition.serviceClass.name} service` +
-          `${Object.keys(options).length ? ` with options: ${JSON.stringify(options)}` : ''}`,
+        `[${this.accessory.displayName}] Created handler for ${serviceDefinition.serviceClass.name} service`,
       );
     }
 
