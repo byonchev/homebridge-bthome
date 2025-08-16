@@ -100,6 +100,7 @@
                       "illuminance",
                       "motion",
                       "occupancy",
+                      "smoke",
                       "temperature"
                     ],
                     "enumNames": [
@@ -113,6 +114,7 @@
                       "Light Sensor",
                       "Motion Sensor",
                       "Occupancy Sensor",
+                      "Smoke Sensor",
                       "Temperature Sensor"
                     ]
                   },
