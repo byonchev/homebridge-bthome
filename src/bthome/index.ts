@@ -234,7 +234,7 @@ export class BTHomeDevice {
         // Carbon monoxide detected
         case 0x17:
           result.carbonMonoxideDetected = data.readUint8(offset + 1) === 1;
-          offset += 3;
+          offset += 2;
           break;
 
         // Smoke detected

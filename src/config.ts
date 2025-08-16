@@ -11,6 +11,7 @@ export type ServiceType =
   | 'illuminance'
   | 'information'
   | 'motion'
+  | 'occupancy'
   | 'temperature';
 
 export interface AirQualityBreakpoints {
