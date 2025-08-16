@@ -14,6 +14,7 @@ import { ServiceClass, ServiceDefinition } from './types.js';
 import { ServiceHandler } from './base.js';
 import { AirQualityHandler } from './air_quality.js';
 import { CarbonDioxideHandler } from './carbon_dioxide.js';
+import { CarbonMonoxideHandler } from './carbon_monoxide.js';
 
 export class ServiceManager {
   private readonly api: API;
@@ -153,6 +154,11 @@ export class ServiceManager {
         type: 'carbonDioxide',
         serviceClass: Service.CarbonDioxideSensor,
         handlerClass: CarbonDioxideHandler,
+      },
+      {
+        type: 'carbonMonoxide',
+        serviceClass: Service.CarbonMonoxideSensor,
+        handlerClass: CarbonMonoxideHandler,
       },
       {
         type: 'contact',
