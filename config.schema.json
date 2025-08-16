@@ -90,24 +90,24 @@
                   "items": {
                     "type": "string",
                     "enum": [
-                      "temperature",
-                      "humidity",
+                      "airQuality",
                       "battery",
-                      "illuminance",
                       "button",
-                      "motion",
                       "contact",
-                      "airQuality"
+                      "humidity",
+                      "illuminance",
+                      "motion",
+                      "temperature"
                     ],
                     "enumNames": [
-                      "Temperature",
-                      "Humidity",
-                      "Battery",
-                      "Illuminance",
-                      "Button",
-                      "Motion",
-                      "Contact",
-                      "Air Quality"
+                      "Air Quality Sensor",
+                      "Battery Indicator",
+                      "Stateless Switch",
+                      "Contact Sensor",
+                      "Humidity Sensor",
+                      "Light Sensor",
+                      "Motion Sensor",
+                      "Temperature Sensor"
                     ]
                   },
                   "uniqueItems": true,
