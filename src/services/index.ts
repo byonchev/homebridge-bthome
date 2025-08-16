@@ -15,6 +15,7 @@ import { ServiceHandler } from './base.js';
 import { AirQualityHandler } from './air_quality.js';
 import { CarbonDioxideHandler } from './carbon_dioxide.js';
 import { CarbonMonoxideHandler } from './carbon_monoxide.js';
+import { OccupancyHandler } from './occupancy.js';
 
 export class ServiceManager {
   private readonly api: API;
@@ -184,6 +185,11 @@ export class ServiceManager {
         type: 'motion',
         serviceClass: Service.MotionSensor,
         handlerClass: MotionHandler,
+      },
+      {
+        type: 'occupancy',
+        serviceClass: Service.OccupancySensor,
+        handlerClass: OccupancyHandler,
       },
       {
         type: 'temperature',

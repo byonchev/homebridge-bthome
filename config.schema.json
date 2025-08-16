@@ -99,6 +99,7 @@
                       "humidity",
                       "illuminance",
                       "motion",
+                      "occupancy",
                       "temperature"
                     ],
                     "enumNames": [
@@ -111,6 +112,7 @@
                       "Humidity Sensor",
                       "Light Sensor",
                       "Motion Sensor",
+                      "Occupancy Sensor",
                       "Temperature Sensor"
                     ]
                   },
