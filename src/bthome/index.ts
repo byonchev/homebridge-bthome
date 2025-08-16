@@ -269,21 +269,18 @@ export class BTHomeDevice {
 
         // Not implemented
         case 0x09:
-        case 0x2f:
-        case 0x59:
-        case 0x46:
+        case 0x0f:
+        case 0x10:
+        case 0x11:
         case 0x18:
         case 0x19:
         case 0x1c:
-        case 0x0f:
         case 0x1d:
         case 0x1e:
         case 0x1f:
         case 0x20:
         case 0x22:
-        case 0x11:
         case 0x24:
-        case 0x10:
         case 0x25:
         case 0x26:
         case 0x27:
@@ -291,6 +288,10 @@ export class BTHomeDevice {
         case 0x2a:
         case 0x2b:
         case 0x2c:
+        case 0x2f:
+        case 0x46:
+        case 0x59:
+        case 0x60:
           offset += 2;
           break;
         case 0x06:
@@ -303,23 +304,27 @@ export class BTHomeDevice {
         case 0x40:
         case 0x41:
         case 0x43:
+        case 0x44:
         case 0x47:
         case 0x48:
         case 0x49:
         case 0x4a:
         case 0x51:
         case 0x52:
+        case 0x56:
         case 0x5a:
         case 0x5d:
+        case 0x5e:
+        case 0x5f:
         case 0xf0:
           offset += 3;
           break;
-        case 0x42:
+        case 0x04:
         case 0x0a:
         case 0x0b:
-        case 0x04:
-        case 0x4b:
         case 0x3c:
+        case 0x42:
+        case 0x4b:
           offset += 4;
           break;
         case 0x3e:
@@ -328,9 +333,9 @@ export class BTHomeDevice {
         case 0x4e:
         case 0x4f:
         case 0x50:
+        case 0x55:
         case 0x5b:
         case 0x5c:
-        case 0x55:
           offset += 5;
           break;
         case 0x53:
