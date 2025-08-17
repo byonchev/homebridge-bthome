@@ -151,6 +151,6 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
   }
 
   private generateUUID(mac: string): string {
-    return this.api.hap.uuid.generate(mac);
+    return this.api.hap.uuid.generate(mac.toLocaleLowerCase());
   }
 }
