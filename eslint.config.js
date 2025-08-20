@@ -24,6 +24,15 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'prettier/prettier': 'error',
       'import/extensions': ['error', 'always', { js: 'always' }],
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
+        {
+          accessibility: 'explicit',
+          overrides: {
+            constructors: 'no-public',
+          },
+        },
+      ],
     },
   },
   {

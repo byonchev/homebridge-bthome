@@ -35,7 +35,7 @@ export class BTHomeDevice {
     this.encryptionKey = encryptionKey?.length ? Buffer.from(encryptionKey, 'hex') : undefined;
   }
 
-  update(serviceData: Buffer) {
+  public update(serviceData: Buffer) {
     try {
       const sensorData = this.decodeServiceData(serviceData);
 
@@ -57,11 +57,11 @@ export class BTHomeDevice {
     }
   }
 
-  onUpdate(callback: (data: BTHomeSensorData) => void) {
+  public onUpdate(callback: (data: BTHomeSensorData) => void) {
     this.events.on(BTHomeDevice.UPDATE_EVENT, callback);
   }
 
-  getManufacturerData(): ManufacturerData {
+  public getManufacturerData(): ManufacturerData {
     return Object.assign({}, this.manufacturerData);
   }
 
