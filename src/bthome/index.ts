@@ -221,7 +221,7 @@ export class BTHomeDevice {
         case 0x1a:
         case 0x1b:
         case 0x2d:
-          this.pushMeasurement(result, 'contactDetected', this.readBool(data, offset + 1));
+          this.pushMeasurement(result, 'contactDetected', !this.readBool(data, offset + 1));
           offset += 2;
           break;
 
