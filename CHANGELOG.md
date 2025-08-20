@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update noble to latest version (2.3.4)
 
+### Fixed
+- Set accessory information on latest manufacturer data, not only on first accessory registration
+
 ## [1.2.5] - 2025-08-01
 
 ### Fixed
