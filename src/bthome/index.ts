@@ -383,7 +383,7 @@ export class BTHomeDevice {
   }
 
   private readUInt24LE(data: Buffer, offset: number): number {
-    return data[offset + 1] | (data[offset + 2] << 8) | (data[offset + 3] << 16);
+    return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16);
   }
 
   private readBool(data: Buffer, offset: number): boolean {
