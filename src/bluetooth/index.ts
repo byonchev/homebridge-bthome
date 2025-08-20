@@ -1,4 +1,4 @@
-import { Peripheral } from '@stoprocent/noble';
+import { withBindings, Peripheral, Noble } from '@stoprocent/noble';
 import { EventEmitter } from 'events';
 
 import { BluetoothAdvertisment, ManufacturerData, BluetoothError } from './types.js';
@@ -29,11 +29,11 @@ export class BluetoothScanner {
 
     return withTimeout(
       async () => {
-        const noble = await this.getNobleInstance();
+        const noble = this.getNobleInstance();
         this.log.debug('Loaded noble instance');
 
         try {
-          await noble.waitForPoweredOn(timeout);
+          await noble.waitForPoweredOnAsync(timeout);
           this.log.debug('Bluetooth device powered on');
 
           noble.on('discover', this.onDiscoverInternal.bind(this));
@@ -51,20 +51,9 @@ export class BluetoothScanner {
     );
   }
 
-  private async getNobleInstance() {
+  private getNobleInstance(): Noble {
     try {
-      if (['linux', 'freebsd', 'win32'].includes(process.platform)) {
-        const { default: BluetoothHciSocket } = await import('@stoprocent/bluetooth-hci-socket');
-
-        const socket = new BluetoothHciSocket();
-
-        // @ts-expect-error parameter is not used and can be undefined, but there's a strict expectation in library
-        socket.bindRaw(undefined);
-      }
-
-      const module = await import('@stoprocent/noble');
-
-      return module.default;
+      return withBindings('default');
     } catch (error) {
       throw wrapError(error, BluetoothError, 'Failed to instantiate noble');
     }

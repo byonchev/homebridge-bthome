@@ -9,7 +9,7 @@ export const wrapError = <E extends WrappedConstructor>(original: unknown, error
     stack = original.stack;
   }
 
-  const result = new errorType(message);
+  const result = new errorType(`${errorType.name}: ${message}`);
 
   if (stack) {
     result.stack = stack;
