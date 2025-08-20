@@ -38,7 +38,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  configureAccessory(accessory: PlatformAccessory) {
+  public configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
     let mac = accessory.context.device?.mac;
@@ -56,7 +56,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     this.accessories.set(accessory.UUID, accessory);
   }
 
-  removeStaleAccessories() {
+  private removeStaleAccessories() {
     if (this.staleAccessories.length === 0) {
       return;
     }
@@ -68,7 +68,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  async discoverDevices() {
+  private async discoverDevices() {
     if (!this.config.devices || this.config.devices.length === 0) {
       this.log.warn('No devices configured');
       return;

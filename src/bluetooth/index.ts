@@ -22,26 +22,7 @@ export class BluetoothScanner {
     this.log = log;
   }
 
-  async getNobleInstance() {
-    try {
-      if (['linux', 'freebsd', 'win32'].includes(process.platform)) {
-        const { default: BluetoothHciSocket } = await import('@stoprocent/bluetooth-hci-socket');
-
-        const socket = new BluetoothHciSocket();
-
-        // @ts-expect-error parameter is not used and can be undefined, but there's a strict expectation in library
-        socket.bindRaw(undefined);
-      }
-
-      const module = await import('@stoprocent/noble');
-
-      return module.default;
-    } catch (error) {
-      throw wrapError(error, BluetoothError, 'Failed to instantiate noble');
-    }
-  }
-
-  async start(timeout: number = BluetoothScanner.DEFAULT_TIMEOUT) {
+  public async start(timeout: number = BluetoothScanner.DEFAULT_TIMEOUT) {
     if (this.started) {
       return;
     }
@@ -70,7 +51,26 @@ export class BluetoothScanner {
     );
   }
 
-  onDiscover(callback: (device: BluetoothAdvertisment) => void) {
+  private async getNobleInstance() {
+    try {
+      if (['linux', 'freebsd', 'win32'].includes(process.platform)) {
+        const { default: BluetoothHciSocket } = await import('@stoprocent/bluetooth-hci-socket');
+
+        const socket = new BluetoothHciSocket();
+
+        // @ts-expect-error parameter is not used and can be undefined, but there's a strict expectation in library
+        socket.bindRaw(undefined);
+      }
+
+      const module = await import('@stoprocent/noble');
+
+      return module.default;
+    } catch (error) {
+      throw wrapError(error, BluetoothError, 'Failed to instantiate noble');
+    }
+  }
+
+  public onDiscover(callback: (device: BluetoothAdvertisment) => void) {
     this.events.on(BluetoothScanner.DISCOVER_EVENT, callback);
   }
 
