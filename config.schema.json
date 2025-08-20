@@ -34,13 +34,6 @@
       }
     },
     "properties": {
-      "name": {
-        "title": "Plugin Name",
-        "description": "The name for this BTHome platform instance in Homebridge",
-        "type": "string",
-        "default": "BTHome",
-        "required": true
-      },
       "devices": {
         "title": "Devices",
         "description": "List of devices to connect to and monitor",

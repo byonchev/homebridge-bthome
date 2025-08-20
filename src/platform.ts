@@ -28,7 +28,7 @@ export class BTHomePlatform implements DynamicPlatformPlugin {
     this.Characteristic = api.hap.Characteristic;
     this.scanner = new BluetoothScanner(BTHomeDevice.UUID, log);
 
-    this.log.debug('Finished initializing platform:', this.config.platform);
+    this.log.debug(`Finished initializing ${this.config.platform}`);
 
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');

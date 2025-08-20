@@ -21,9 +21,9 @@ export class BTHomeAccessory {
 
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, manufacturerData.manufacturer || 'Unknown')
-      .setCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
+      .updateCharacteristic(this.platform.Characteristic.Manufacturer, manufacturerData.manufacturer || 'Unknown')
+      .updateCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
+      .updateCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
 
     const config = this.getDeviceConfiguration();
 

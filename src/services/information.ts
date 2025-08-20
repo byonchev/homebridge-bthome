@@ -11,6 +11,6 @@ export class InformationHandler extends ServiceHandler {
       return;
     }
 
-    this.service.getCharacteristic(this.Characteristic.FirmwareRevision).updateValue(sensorData.firmwareVersion);
+    this.service.updateCharacteristic(this.Characteristic.FirmwareRevision, sensorData.firmwareVersion);
   }
 }
