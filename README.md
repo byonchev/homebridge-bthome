@@ -47,19 +47,22 @@ This plugin does not automatically add all discovered BTHome devices. Each devic
 
 ### Supported Devices
 
-This is a list of devices that should work with this plugin. Some of them aren't tested (see table below).
+| Device                 | Support status       | Tested             |
+| ---------------------- | ------------------   | ------------------ |
+| Shelly BLU H&T         | :heavy_check_mark:   | :heavy_check_mark: |
+| Shelly BLU Motion      | :heavy_check_mark:   | :heavy_check_mark: |
+| Shelly BLU Door/Window | :heavy_check_mark:   | :heavy_check_mark: |
+| Shelly BLU Button      | :heavy_check_mark:   | :x:                |
+| Shelly BLU Wall Switch | :heavy_check_mark:   | :x:                |
+| Shelly BLU RC Button   | :heavy_check_mark:   | :x:                |
+| Shelly BLU TRV         | _Partial support\*_  | :x:                |
 
-If you own some of the untested devices and the plugin works for you, please let me know so I can update its status.
 
-| Device                 | Tested             |
-| ---------------------- | ------------------ |
-| Shelly BLU H&T         | :heavy_check_mark: |
-| Shelly BLU Motion      | :heavy_check_mark: |
-| Shelly BLU Button      | :x:                |
-| Shelly BLU Wall Switch | :x:                |
-| Shelly BLU RC Button   | :x:                |
-| Shelly BLU Door/Window | :x:                |
-| Shelly BLU TRV         | :x:                |
+_If you own some of the untested devices and the plugin works for you, please let me know so I can update its status._
+
+#### Notes:
+
+- _\* Partial support:_ The BTHome protocol is one-way (read-only), which means Homebridge can only receive data from these devices. If a device requires additional features that depend on sending data back (e.g., configuration changes, control commands, switching modes), those functions will not be available while using this plugin.
 
 <a id="supported_features"></a>
 
@@ -70,12 +73,12 @@ If you own some of the untested devices and the plugin works for you, please let
 | Encryption                            | :heavy_check_mark: |
 | Multiple Sensor Readings of Same Type | :heavy_check_mark: |
 | Multiple Bluetooth Devices\*          | :x:                |
-| EVE Services & Characteristics        | :x:                |
-| Fakegato                              | :x:                |
+| EVE Services & Characteristics        | Planned            |
+| Fakegato                              | Planned            |
 
 #### Notes:
 
-- _\*Multiple Bluetooth Devices:_ If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
+- _\* Multiple Bluetooth Devices:_ If your setup includes multiple Bluetooth devices, the plugin will default to using the first available device.
 
 ### Contributing
 
