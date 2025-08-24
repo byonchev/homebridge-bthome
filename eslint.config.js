@@ -23,7 +23,7 @@ export default tseslint.config(
       '@typescript-eslint/no-use-before-define': ['error', { classes: false, enums: false }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'prettier/prettier': 'error',
-      'import/extensions': ['error', 'always', { js: 'always' }],
+      'import/extensions': ['error', 'always', { js: 'always', ignorePackages: true }],
       '@typescript-eslint/explicit-member-accessibility': [
         'error',
         {

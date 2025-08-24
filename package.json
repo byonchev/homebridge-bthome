@@ -36,7 +36,10 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "lint": "eslint . --max-warnings=0",
-    "prepublishOnly": "npm run lint && npm run build",
+    "test:watch": "vitest",
+    "test:ui": "vitest --coverage --ui",
+    "test": "vitest run",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
     "watch": "npm run build && npm link && NODE_OPTIONS='--force-node-api-uncaught-exceptions-policy=true' nodemon"
   },
   "dependencies": {
@@ -46,6 +49,8 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/node": "^22.13.5",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
@@ -57,6 +62,7 @@
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1"
+    "typescript-eslint": "^8.24.1",
+    "vitest": "^3.2.4"
   }
 }
