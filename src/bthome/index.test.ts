@@ -154,154 +154,162 @@ describe('BTHomeDevice', () => {
       });
 
       it('should decode packet ID', () => {
-        const serviceData = Buffer.from([0x40, 0x00, 0xff]);
+        const serviceData = Buffer.from('4000FF', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ packetId: 255 }));
       });
 
       it('should decode firmware version (4 bytes)', () => {
-        const serviceData = Buffer.from([0x40, 0xf1, 0x01, 0x02, 0x03, 0x04]);
+        const serviceData = Buffer.from('40F100010204', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ firmwareVersion: '4.3.2.1' }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ firmwareVersion: '4.2.1.0' }));
       });
 
       it('should decode firmware version (3 bytes)', () => {
-        const serviceData = Buffer.from([0x40, 0xf2, 0x01, 0x02, 0x03]);
+        const serviceData = Buffer.from('40F2000106', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ firmwareVersion: '3.2.1' }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ firmwareVersion: '6.1.0' }));
       });
 
       it('should decode battery level', () => {
-        const serviceData = Buffer.from([0x40, 0x01, 0x64]);
+        const serviceData = Buffer.from('400161', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ batteryLevel: [100] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ batteryLevel: [97] }));
       });
 
       it('should decode battery low status', () => {
-        const serviceData = Buffer.from([0x40, 0x15, 0x01]);
+        const serviceData = Buffer.from('401501', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ batteryLow: [true] }));
       });
 
       it('should decode battery charging status', () => {
-        const serviceData = Buffer.from([0x40, 0x16, 0x00]);
+        const serviceData = Buffer.from('401601', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ batteryCharging: [false] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ batteryCharging: [true] }));
       });
 
-      it('should decode temperature (precision 0.01)', () => {
-        const serviceData = Buffer.from([0x40, 0x02, 0x64, 0x00]);
+      it('should decode temperature (precision 1)', () => {
+        const serviceData = Buffer.from('4057EA', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [1] }));
-      });
-
-      it('should decode temperature (precision 0.1)', () => {
-        const serviceData = Buffer.from([0x40, 0x45, 0x64, 0x00]);
-        device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [10] }));
-      });
-
-      it('should decode temperature (1 byte)', () => {
-        const serviceData = Buffer.from([0x40, 0x57, 0x19]);
-        device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [25] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [-22] }));
       });
 
       it('should decode temperature (precision 0.35)', () => {
-        const serviceData = Buffer.from([0x40, 0x58, 0x23]);
+        const serviceData = Buffer.from('4058EA', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [100] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [-7.7] }));
+      });
+
+      it('should decode temperature (precision 0.1)', () => {
+        const serviceData = Buffer.from('40451101', 'hex');
+        device.update(serviceData);
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [27.3] }));
+      });
+
+      it('should decode temperature (precision 0.01)', () => {
+        const serviceData = Buffer.from('4002CA09', 'hex');
+        device.update(serviceData);
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [25.06] }));
       });
 
       it('should decode humidity (precision 0.01)', () => {
-        const serviceData = Buffer.from([0x40, 0x03, 0x40, 0x1f]);
+        const serviceData = Buffer.from('4003BF13', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [80] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [50.55] }));
       });
 
       it('should decode humidity (1 byte)', () => {
-        const serviceData = Buffer.from([0x40, 0x2e, 0x50]);
+        const serviceData = Buffer.from('402E23', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [80] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [35] }));
       });
 
       it('should decode illuminance', () => {
-        const serviceData = Buffer.from([0x40, 0x05, 0x10, 0x27, 0x00]);
+        const serviceData = Buffer.from('4005138A14', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ illuminance: [100] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ illuminance: [13460.67] }));
       });
 
       it('should decode motion detection', () => {
-        const serviceData = Buffer.from([0x40, 0x21, 0x01]);
+        const serviceData = Buffer.from('402100', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ motionDetected: [true] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ motionDetected: [false] }));
       });
 
-      it('should decode contact detection (inverted)', () => {
-        const serviceData = Buffer.from([0x40, 0x1a, 0x00]);
+      it('should decode door', () => {
+        const serviceData = Buffer.from('401A00', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ contactDetected: [true] }));
       });
 
+      it('should decode garage door', () => {
+        const serviceData = Buffer.from('401B01', 'hex');
+        device.update(serviceData);
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ contactDetected: [false] }));
+      });
+
+      it('should decode window', () => {
+        const serviceData = Buffer.from('402D01', 'hex');
+        device.update(serviceData);
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ contactDetected: [false] }));
+      });
+
       it('should decode occupancy detection', () => {
-        const serviceData = Buffer.from([0x40, 0x23, 0x01]);
+        const serviceData = Buffer.from('402301', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ occupancyDetected: [true] }));
       });
 
       it('should decode carbon monoxide detection', () => {
-        const serviceData = Buffer.from([0x40, 0x17, 0x01]);
+        const serviceData = Buffer.from('401700', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ carbonMonoxideDetected: [true] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ carbonMonoxideDetected: [false] }));
       });
 
       it('should decode smoke detection', () => {
-        const serviceData = Buffer.from([0x40, 0x29, 0x01]);
+        const serviceData = Buffer.from('402901', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ smokeDetected: [true] }));
       });
 
       it('should decode carbon dioxide level', () => {
-        const serviceData = Buffer.from([0x40, 0x12, 0x90, 0x01]);
+        const serviceData = Buffer.from('4012E204', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ carbonDioxideLevel: [400] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ carbonDioxideLevel: [1250] }));
       });
 
       it('should decode PM2.5 density', () => {
-        const serviceData = Buffer.from([0x40, 0x0d, 0x19, 0x00]);
+        const serviceData = Buffer.from('400D120C', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ pm25Density: [25] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ pm25Density: [3090] }));
       });
 
       it('should decode PM10 density', () => {
-        const serviceData = Buffer.from([0x40, 0x0e, 0x32, 0x00]);
+        const serviceData = Buffer.from('400E021C', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ pm10Density: [50] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ pm10Density: [7170] }));
       });
 
       it('should decode VOC density', () => {
-        const serviceData = Buffer.from([0x40, 0x13, 0x64, 0x00]);
+        const serviceData = Buffer.from('40133301', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ vocDensity: [100] }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ vocDensity: [307] }));
       });
 
       it('should handle multiple measurements of same type', () => {
-        const serviceData = Buffer.from([0x40, 0x02, 0x64, 0x00, 0x02, 0xc8, 0x00]);
+        const serviceData = Buffer.from('403A003A01', 'hex');
         device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ temperature: [1, 2] }));
+        expect(callback).toHaveBeenCalledWith(
+          expect.objectContaining({ button: [ButtonEvent.None, ButtonEvent.SinglePress] }),
+        );
       });
 
-      it('should handle unsupported object IDs gracefully', () => {
-        const serviceData = Buffer.from([0x40, 0xff, 0x01]);
+      it('should decode correctly until an unidentified object id is reached', () => {
+        const serviceData = Buffer.from([0x40, 0x00, 0x42, 0xff, 0x01, 0x29, 0x01]);
         device.update(serviceData);
 
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({}));
-      });
-
-      it('should skip unimplemented object IDs', () => {
-        const serviceData = Buffer.from([0x40, 0x09, 0x01, 0x00, 0x02]);
-        device.update(serviceData);
-        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ packetId: 2 }));
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ packetId: 66 }));
       });
 
       it('should skip unimplemented object IDs with different byte lengths', () => {

@@ -181,7 +181,7 @@ export class BTHomeDevice {
           offset += 3;
           break;
         case 0x58:
-          this.pushMeasurement(result, 'temperature', (data.readInt8(offset + 1) * 100) / 35);
+          this.pushMeasurement(result, 'temperature', (data.readInt8(offset + 1) * 35) / 100);
           offset += 2;
           break;
         case 0x57:
