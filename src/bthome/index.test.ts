@@ -4,10 +4,6 @@ import { ButtonEvent } from './types.js';
 import { BluetoothAdvertisment, ManufacturerData } from '../bluetooth/types.js';
 import { Logger } from 'homebridge';
 
-vi.mock('homebridge-lib', () => ({
-  formatError: vi.fn(error => error?.message || String(error)),
-}));
-
 describe('BTHomeDevice', () => {
   let mockLogger: Logger;
   let mockAdvertisement: BluetoothAdvertisment;
@@ -15,14 +11,7 @@ describe('BTHomeDevice', () => {
   let mockEncryptionKey: string;
 
   beforeEach(() => {
-    mockLogger = {
-      debug: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      log: vi.fn(),
-      success: vi.fn(),
-    } as Logger;
+    mockLogger = vi.mocked(new Proxy({}, { get: () => vi.fn() }) as Logger);
 
     mockManufacturerData = {
       manufacturer: 'Test',
@@ -68,6 +57,15 @@ describe('BTHomeDevice', () => {
 
       expect(data).toEqual(mockManufacturerData);
       expect(data).not.toBe(mockManufacturerData);
+    });
+  });
+
+  describe('getMacAddress()', () => {
+    it('should return the MAC address', () => {
+      const device = new BTHomeDevice(mockAdvertisement, mockLogger);
+      const mac = device.getMacAddress();
+
+      expect(mac).toEqual(mockAdvertisement.mac);
     });
   });
 
