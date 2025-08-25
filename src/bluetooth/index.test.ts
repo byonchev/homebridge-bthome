@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { BluetoothScanner } from './index.js';
 import { BluetoothError } from './types.js';
 import { Logger } from 'homebridge';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Noble, Peripheral, withBindings } from '@stoprocent/noble';
 
 vi.mock('@stoprocent/noble', () => ({
   withBindings: vi.fn(),
@@ -12,8 +11,6 @@ vi.mock('@stoprocent/noble', () => ({
 vi.mock('../util/timeout.js', () => ({
   withTimeout: vi.fn(fn => fn()),
 }));
-
-import { Noble, Peripheral, withBindings } from '@stoprocent/noble';
 
 describe('BluetoothScanner', () => {
   let mockLogger: Logger;
@@ -31,7 +28,7 @@ describe('BluetoothScanner', () => {
       waitForPoweredOnAsync: vi.fn(),
       startScanningAsync: vi.fn(),
       on: mockNobleEvent,
-    } as any as Noble;
+    } as unknown as Noble;
     mockCallback = vi.fn();
 
     (withBindings as Mock).mockReturnValue(mockNoble);
@@ -96,7 +93,7 @@ describe('BluetoothScanner', () => {
       scanner.onDiscover(mockCallback);
       await scanner.start();
 
-      const discoverCall = mockNobleEvent.mock.calls.find((call: any[]) => call[0] === 'discover');
+      const discoverCall = mockNobleEvent.mock.calls.find((call: unknown[]) => call[0] === 'discover');
       expect(discoverCall).toBeDefined();
 
       onDiscoverHandler = discoverCall![1];
@@ -110,7 +107,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([0xa9, 0x0b, 0x0a, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x0b, 0x01, 0x00]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -133,7 +130,7 @@ describe('BluetoothScanner', () => {
           serviceData: [{ uuid: 'fcd2', data: Buffer.from([]) }],
           manufacturerData: Buffer.from([0xa9, 0x0b, 0x0b, 0x01, 0x00]),
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -151,7 +148,7 @@ describe('BluetoothScanner', () => {
           serviceData: [{ uuid: 'fcd2', data: Buffer.from([]) }],
           manufacturerData: Buffer.from([0xa9, 0x0b, 0x0a, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]),
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -170,7 +167,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([0xff, 0x0b, 0x0a, 0xbb, 0xaa, 0x0b, 0x01, 0x00]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -190,7 +187,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([0xa9, 0x0b, 0x0b]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -209,7 +206,7 @@ describe('BluetoothScanner', () => {
           serviceData: [{ uuid: 'fcd2', data: Buffer.from([]) }],
           manufacturerData: Buffer.from([]),
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -227,7 +224,7 @@ describe('BluetoothScanner', () => {
           serviceData: [{ uuid: 'fcd2', data: Buffer.from([]) }],
           manufacturerData: Buffer.from([]),
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -246,7 +243,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -265,7 +262,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
@@ -279,7 +276,7 @@ describe('BluetoothScanner', () => {
           manufacturerData: Buffer.from([]),
           localName: 'TestDevice',
         },
-      } as any as Peripheral;
+      } as Peripheral;
 
       onDiscoverHandler(mockPeripheral);
 
