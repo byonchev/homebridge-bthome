@@ -18,12 +18,13 @@ export class BTHomeAccessory {
     this.device = this.getDevice();
 
     const manufacturerData = this.device.getManufacturerData();
+    const mac = this.device.getMacAddress();
 
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .updateCharacteristic(this.platform.Characteristic.Manufacturer, manufacturerData.manufacturer || 'Unknown')
       .updateCharacteristic(this.platform.Characteristic.Model, manufacturerData.model || 'Unknown')
-      .updateCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || 'Unknown');
+      .updateCharacteristic(this.platform.Characteristic.SerialNumber, manufacturerData.serialNumber || mac);
 
     const config = this.getDeviceConfiguration();
 

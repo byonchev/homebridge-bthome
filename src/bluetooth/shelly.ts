@@ -1,6 +1,6 @@
-import { ManufacturerData } from './types.js';
+import { BluetoothError, ManufacturerData } from './types.js';
 
-const decodeModelName = (identifier: number): string | undefined => {
+const decodeShellyModelName = (identifier: number): string | undefined => {
   switch (identifier) {
     case 0x0001:
       return 'SBBT-002C';
@@ -20,7 +20,7 @@ const decodeModelName = (identifier: number): string | undefined => {
 };
 
 export const decodeShellyManufacturerData = (data: Buffer): ManufacturerData => {
-  const result: ManufacturerData = { manufacturer: 'Shelly' };
+  const result: ManufacturerData = {};
 
   let offset = 2;
   while (offset < data.length) {
@@ -40,9 +40,11 @@ export const decodeShellyManufacturerData = (data: Buffer): ManufacturerData => 
         offset += 7;
         break;
       case 0x0b:
-        result.model = decodeModelName(data.readUInt16LE(offset + 1));
+        result.model = decodeShellyModelName(data.readUInt16LE(offset + 1));
         offset += 3;
         break;
+      default:
+        throw new BluetoothError(`Unknown Shelly manufacturer data block type: 0x${blockType.toString(16)}`);
     }
   }
 

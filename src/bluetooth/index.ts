@@ -6,6 +6,7 @@ import { wrapError } from '../util/errors.js';
 import { decodeShellyManufacturerData } from './shelly.js';
 import { Logger } from 'homebridge';
 import { withTimeout } from '../util/timeout.js';
+import { formatError } from 'homebridge-lib';
 
 export class BluetoothScanner {
   private static readonly DISCOVER_EVENT = 'discover';
@@ -51,14 +52,6 @@ export class BluetoothScanner {
     );
   }
 
-  private getNobleInstance(): Noble {
-    try {
-      return withBindings('default');
-    } catch (error) {
-      throw wrapError(error, BluetoothError, 'Failed to instantiate noble');
-    }
-  }
-
   public onDiscover(callback: (device: BluetoothAdvertisment) => void) {
     this.events.on(BluetoothScanner.DISCOVER_EVENT, callback);
   }
@@ -75,11 +68,7 @@ export class BluetoothScanner {
     const serviceData = service.data;
     const manufacturerData = this.decodeManufacturerData(advertisementData.manufacturerData);
     const mac = manufacturerData?.mac?.toLocaleLowerCase() || peripheral.address.toLowerCase() || 'unknown';
-    const name = advertisementData.localName || this.generateDeviceName(mac);
-
-    if (!manufacturerData.serialNumber) {
-      manufacturerData.serialNumber = mac;
-    }
+    const name = advertisementData.localName || manufacturerData.model || this.generateDeviceName(mac);
 
     const device: BluetoothAdvertisment = { name, mac, serviceData, manufacturerData };
 
@@ -91,17 +80,30 @@ export class BluetoothScanner {
   }
 
   private decodeManufacturerData(data?: Buffer): ManufacturerData {
-    if (!data) {
+    if (!data || data.length < 2) {
       return {};
     }
 
     const companyIdentifier = data.readUInt16LE(0);
 
-    switch (companyIdentifier) {
-      case 0x0ba9:
-        return decodeShellyManufacturerData(data);
-      default:
-        return {};
+    try {
+      switch (companyIdentifier) {
+        case 0x0ba9:
+          return { manufacturer: 'Shelly', ...decodeShellyManufacturerData(data) };
+        default:
+          return {};
+      }
+    } catch (error) {
+      this.log.warn(`Failed to decode manufacturer data:`, formatError(error));
+      return {};
+    }
+  }
+
+  private getNobleInstance(): Noble {
+    try {
+      return withBindings('default');
+    } catch (error) {
+      throw wrapError(error, BluetoothError, 'Failed to instantiate noble');
     }
   }
 }

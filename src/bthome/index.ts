@@ -65,6 +65,10 @@ export class BTHomeDevice {
     return Object.assign({}, this.manufacturerData);
   }
 
+  public getMacAddress(): string {
+    return this.mac;
+  }
+
   private decodeServiceData(serviceData: Buffer): BTHomeSensorData {
     const flags = serviceData.readUInt8(0);
     const version = (flags >> 5) & 0x07;
