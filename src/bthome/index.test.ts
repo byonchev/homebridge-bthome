@@ -217,7 +217,7 @@ describe('BTHomeDevice', () => {
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [50.55] }));
       });
 
-      it('should decode humidity (1 byte)', () => {
+      it('should decode humidity (precision 1)', () => {
         const serviceData = Buffer.from('402E23', 'hex');
         device.update(serviceData);
         expect(callback).toHaveBeenCalledWith(expect.objectContaining({ humidity: [35] }));

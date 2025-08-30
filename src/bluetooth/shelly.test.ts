@@ -12,28 +12,28 @@ describe('decodeShellyManufacturerData', () => {
     });
   });
 
-  describe('model name decoding', () => {
-    const modelTestCases = [
-      { input: 0x01, expectedModel: 'SBBT-002C' },
-      { input: 0x02, expectedModel: 'SBDW-002C' },
-      { input: 0x03, expectedModel: 'SBHT-003C' },
-      { input: 0x05, expectedModel: 'SBMO-003Z' },
-      { input: 0x06, expectedModel: 'SBBT-004CEU' },
-      { input: 0x07, expectedModel: 'SBBT-004CUS' },
-      { input: 0x08, expectedModel: 'SBTR-001AEU' },
+  describe('should decode known model names', () => {
+    const testCases = [
+      { input: 0x01, expected: 'SBBT-002C' },
+      { input: 0x02, expected: 'SBDW-002C' },
+      { input: 0x03, expected: 'SBHT-003C' },
+      { input: 0x05, expected: 'SBMO-003Z' },
+      { input: 0x06, expected: 'SBBT-004CEU' },
+      { input: 0x07, expected: 'SBBT-004CUS' },
+      { input: 0x08, expected: 'SBTR-001AEU' },
     ];
 
-    it.each(modelTestCases)('should decode model $expectedModel', ({ input, expectedModel }) => {
+    testCases.forEach(({ input, expected }) => {
       const data = Buffer.from([0x00, 0x00, 0x0b, input, 0x00]);
 
       const result = decodeShellyManufacturerData(data);
 
       expect(result).toEqual({
-        model: expectedModel,
+        model: expected,
       });
     });
 
-    it('should handle unrecognized model gracefully', () => {
+    it('should handle unrecognized model name gracefully', () => {
       const data = Buffer.from([0x00, 0x00, 0x0b, 0x99, 0x00]);
 
       const result = decodeShellyManufacturerData(data);
