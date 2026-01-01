@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { BTHomeDevice } from './index.js';
-import { ButtonEvent } from './types.js';
+import { ButtonEvent, BTHomeSensorData } from './types.js';
 import { BluetoothAdvertisment, ManufacturerData } from '../bluetooth/types.js';
 import { Logger } from 'homebridge';
 
@@ -143,7 +143,7 @@ describe('BTHomeDevice', () => {
 
     describe('data decoding', () => {
       let device: BTHomeDevice;
-      let callback: ReturnType<typeof vi.fn>;
+      let callback: Mock<(data: BTHomeSensorData) => void>;
 
       beforeEach(() => {
         device = new BTHomeDevice(mockAdvertisement, mockLogger);
@@ -321,7 +321,7 @@ describe('BTHomeDevice', () => {
 
       describe('button events', () => {
         let device: BTHomeDevice;
-        let callback: ReturnType<typeof vi.fn>;
+        let callback: Mock<(data: BTHomeSensorData) => void>;
 
         beforeEach(() => {
           device = new BTHomeDevice(mockAdvertisement, mockLogger);
