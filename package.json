@@ -39,7 +39,7 @@
     "test": "vitest run",
     "test:watch": "vitest --coverage --ui",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
-    "watch": "npm run build && npm link && NODE_OPTIONS='--force-node-api-uncaught-exceptions-policy=true' nodemon"
+    "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
     "homebridge-lib": "^7.1.12",

@@ -5,6 +5,6 @@
   "exec": "tsc && homebridge -I -U ./test/hbConfig -D",
   "signal": "SIGTERM",
   "env": {
-    "NODE_OPTIONS": "--trace-warnings"
+    "NODE_OPTIONS": "--trace-warnings --force-node-api-uncaught-exceptions-policy=true"
   }
 }
