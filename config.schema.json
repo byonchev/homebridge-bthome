@@ -34,6 +34,13 @@
       }
     },
     "properties": {
+      "name": {
+        "title": "Platform Name",
+        "type": "string",
+        "required": true,
+        "default": "BTHomePlatform",
+        "description": "How this plugin will appear in logs (usually doesn't need to be changed)"
+      },
       "devices": {
         "title": "Devices",
         "description": "List of devices to connect to and monitor",
@@ -60,7 +67,7 @@
             },
             "encryptionKey": {
               "title": "Encryption Key",
-              "description": "32-character hex key used to encrypt the advertisment data.<br/>(leave empty if device doesn't use encryption or it's disabled)",
+              "description": "32-character hex key used to encrypt the advertisement data.<br/>(leave empty if device doesn't use encryption or it's disabled)",
               "type": "string",
               "pattern": "^$|^[0-9A-Fa-f]{32}$",
               "required": false
@@ -207,7 +214,7 @@
             "properties": {
               "lowBatteryThreshold": {
                 "title": "Low Battery Threshold",
-                "description": "Battery percentage below which the device will show as 'Low Battery' (if the device reports the battery level).<br/>Configuring this overrides any 'Low Battery' reports from the device (if available).",
+                "description": "Battery level below which the device shows as 'Low Battery' (%).<br/>This overrides any 'Low Battery' reports from the device itself.",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 100,
@@ -221,7 +228,7 @@
             "properties": {
               "threshold": {
                 "title": "Detection Threshold",
-                "description": "Threshold level above which the device will show as 'CO2 Detected' (ppm).",
+                "description": "CO2 level at which the sensor triggers detection (ppm)",
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100000,
@@ -238,7 +245,7 @@
         "properties": {
           "powerOnTimeout": {
             "title": "Bluetooth Power-On Timeout",
-            "description": "Maximum time (in milliseconds) to wait for the Bluetooth adapter to power on before giving up",
+            "description": "How long to wait for the Bluetooth adapter to power on (milliseconds)",
             "type": "integer",
             "minimum": 1000,
             "default": 10000,
