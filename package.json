@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "homebridge-lib": "^7.1.12",
-    "@stoprocent/noble": "^2.3.4"
+    "@stoprocent/noble": "^2.3.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

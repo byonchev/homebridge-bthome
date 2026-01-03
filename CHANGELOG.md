@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Change supported node versions to be in sync with homebridge
+- Update `homebridge-lib` to v7.1.12
+- Update `noble` to v2.3.10
 
 ### Fixed
 - Prevent logs from not appearing in UI by ensuring platform name field is present in config
