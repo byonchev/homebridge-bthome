@@ -120,6 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Create Bluetooth scanning system with advertisement data extraction
 - Add support for button press events with deduplication to prevent multiple triggers
 
+[2.1.0]: https://github.com/byonchev/homebridge-bthome/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/byonchev/homebridge-bthome/compare/v1.2.5...v2.0.0
 [1.2.5]: https://github.com/byonchev/homebridge-bthome/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/byonchev/homebridge-bthome/compare/v1.2.3...v1.2.4
