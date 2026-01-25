@@ -245,11 +245,17 @@
         "properties": {
           "powerOnTimeout": {
             "title": "Bluetooth Power-On Timeout",
-            "description": "How long to wait for the Bluetooth adapter to power on (milliseconds)",
+            "description": "How long to wait for the Bluetooth adapter to power on in milliseconds",
             "type": "integer",
             "minimum": 1000,
             "default": 10000,
             "required": true
+          },
+          "discoveryTimeout": {
+            "title": "Bluetooth Discovery Timeout",
+            "description": "How long to wait after last discovery before restarting the Bluetooth scanner in milliseconds (0 = off).<br />Useful with some adapters where the plugin stops working silently over time.",
+            "type": "integer",
+            "default": 0
           }
         }
       }

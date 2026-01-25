@@ -9,22 +9,24 @@ import { withTimeout } from '../util/timeout.js';
 import { formatError } from 'homebridge-lib';
 
 export class BluetoothScanner {
+  private static readonly AUTO_RECOVERY_INTERVAL = 1 * 10000;
   private static readonly DISCOVER_EVENT = 'discover';
-  private static readonly DEFAULT_TIMEOUT = 60000;
 
   private readonly serviceUuid: string;
   private readonly events: EventEmitter = new EventEmitter();
   private readonly log: Logger;
 
-  private started: boolean = false;
+  private noble: Noble | null = null;
+  private lastDiscoveryTime: Date = new Date();
+  private autoRecoveryHandler?: NodeJS.Timeout;
 
   constructor(serviceUuid: string, log: Logger) {
     this.serviceUuid = serviceUuid.toLocaleLowerCase();
     this.log = log;
   }
 
-  public async start(timeout: number = BluetoothScanner.DEFAULT_TIMEOUT) {
-    if (this.started) {
+  public async start(powerOnTimeout: number = 0, discoveryTimeout: number = 0) {
+    if (this.noble != null) {
       return;
     }
 
@@ -34,7 +36,9 @@ export class BluetoothScanner {
         this.log.debug('Loaded noble instance');
 
         try {
-          await noble.waitForPoweredOnAsync(timeout);
+          this.lastDiscoveryTime = new Date();
+
+          await noble.waitForPoweredOnAsync(powerOnTimeout);
           this.log.debug('Bluetooth device powered on');
 
           noble.on('discover', this.onDiscoverInternal.bind(this));
@@ -42,14 +46,35 @@ export class BluetoothScanner {
           await noble.startScanningAsync([this.serviceUuid], true);
           this.log.debug(`Started scanning for devices with service uuid: ${this.serviceUuid}`);
 
-          this.started = true;
+          this.noble = noble;
+
+          if (discoveryTimeout > 0) {
+            this.scheduleAutoRecovery(powerOnTimeout, discoveryTimeout);
+          }
+
+          this.log.info('Bluetooth scanner started');
         } catch (error) {
           throw wrapError(error, BluetoothError, 'Unknown bluetooth error');
         }
       },
-      timeout,
+      powerOnTimeout,
       new BluetoothError('Bluetooth scanner initialization timeout'),
     );
+  }
+
+  public async stop() {
+    if (this.noble == null) {
+      return;
+    }
+
+    await this.noble.stopScanningAsync();
+    this.noble.stop();
+    this.noble = null;
+
+    if (this.autoRecoveryHandler) {
+      clearTimeout(this.autoRecoveryHandler);
+      this.autoRecoveryHandler = undefined;
+    }
   }
 
   public onDiscover(callback: (device: BluetoothAdvertisment) => void) {
@@ -65,6 +90,8 @@ export class BluetoothScanner {
       return;
     }
 
+    this.lastDiscoveryTime = new Date();
+
     const serviceData = service.data;
     const manufacturerData = this.decodeManufacturerData(advertisementData.manufacturerData);
     const mac = manufacturerData?.mac?.toLocaleLowerCase() || peripheral.address.toLowerCase() || 'unknown';
@@ -73,6 +100,36 @@ export class BluetoothScanner {
     const device: BluetoothAdvertisment = { name, mac, serviceData, manufacturerData };
 
     this.events.emit(BluetoothScanner.DISCOVER_EVENT, device);
+  }
+
+  private scheduleAutoRecovery(powerOnTimeout: number, discoveryTimeout: number) {
+    if (this.autoRecoveryHandler) {
+      clearTimeout(this.autoRecoveryHandler);
+    }
+
+    const checkFn = this.autoRecover.bind(this, powerOnTimeout, discoveryTimeout);
+
+    this.autoRecoveryHandler = setTimeout(checkFn, BluetoothScanner.AUTO_RECOVERY_INTERVAL);
+  }
+
+  private async autoRecover(powerOnTimeout: number, discoveryTimeout: number) {
+    const now = new Date();
+    const timeSinceLastDiscovery = now.getTime() - this.lastDiscoveryTime.getTime();
+
+    if (timeSinceLastDiscovery < discoveryTimeout) {
+      this.scheduleAutoRecovery(powerOnTimeout, discoveryTimeout);
+      return;
+    }
+
+    this.log.info('No devices discovered within timeout, restarting bluetooth scanner...');
+
+    try {
+      await this.stop();
+      await this.start(powerOnTimeout, discoveryTimeout);
+    } catch (error) {
+      this.log.error(`Restart failed:`, formatError(error));
+      this.scheduleAutoRecovery(powerOnTimeout, discoveryTimeout);
+    }
   }
 
   private generateDeviceName(mac: string) {

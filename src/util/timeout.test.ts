@@ -11,6 +11,14 @@ describe('withTimeout', () => {
     expect(result).toBe('success');
   });
 
+  it('should resolve when timeout is 0', async () => {
+    const promise = Promise.resolve('success');
+    const timeoutError = new Error('Timeout');
+
+    const result = await withTimeout(promise, 0, timeoutError);
+    expect(result).toBe('success');
+  });
+
   it('should reject with timeout error when promise takes too long', async () => {
     const slowPromise = new Promise(resolve => setTimeout(() => resolve('too late'), 1000));
     const timeoutError = new Error('Operation timed out');

@@ -36,6 +36,7 @@ export interface DeviceConfig {
 
 export interface BluetoothConfig {
   powerOnTimeout?: number;
+  discoveryTimeout?: number;
 }
 
 export interface ServiceOptions {
