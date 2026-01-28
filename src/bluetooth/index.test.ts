@@ -18,6 +18,7 @@ describe('BluetoothScanner', () => {
   let mockNoble: Noble;
   let mockNobleEvent: Mock;
   let mockNobleStop: Mock;
+  let mockNobleReset: Mock;
   let mockNobleStopScanning: Mock;
   let mockCallback: Mock;
   let scanner: BluetoothScanner;
@@ -30,11 +31,13 @@ describe('BluetoothScanner', () => {
     mockNobleEvent = vi.fn();
     mockNobleStop = vi.fn();
     mockNobleStopScanning = vi.fn();
+    mockNobleReset = vi.fn();
     mockNoble = {
       waitForPoweredOnAsync: vi.fn(),
       startScanningAsync: vi.fn(),
       stopScanningAsync: mockNobleStopScanning,
       stop: mockNobleStop,
+      reset: mockNobleReset,
       on: mockNobleEvent,
     } as unknown as Noble;
     mockCallback = vi.fn();
@@ -109,6 +112,7 @@ describe('BluetoothScanner', () => {
 
       expect(mockNobleStopScanning).toHaveBeenCalled();
       expect(mockNobleStop).toHaveBeenCalled();
+      expect(mockNobleReset).toHaveBeenCalled();
     });
 
     it('should be idempotent', async () => {
@@ -118,6 +122,7 @@ describe('BluetoothScanner', () => {
 
       expect(mockNobleStopScanning).toHaveBeenCalledTimes(1);
       expect(mockNobleStop).toHaveBeenCalledTimes(1);
+      expect(mockNobleReset).toHaveBeenCalledTimes(1);
     });
 
     it('should do nothing if scanner was never started', async () => {
@@ -170,6 +175,7 @@ describe('BluetoothScanner', () => {
       await vi.advanceTimersByTimeAsync(40000);
 
       expect(mockNobleStopScanning).toHaveBeenCalled();
+      expect(mockNobleReset).toHaveBeenCalled();
       expect(mockNoble.waitForPoweredOnAsync).toHaveBeenCalledTimes(2);
       expect(mockNoble.startScanningAsync).toHaveBeenCalledTimes(2);
     });

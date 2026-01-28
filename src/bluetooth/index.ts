@@ -10,6 +10,7 @@ import { formatError } from 'homebridge-lib';
 
 export class BluetoothScanner {
   private static readonly AUTO_RECOVERY_INTERVAL = 1 * 10000;
+  private static readonly RESTART_COOLDOWN_INTERVAL = 5 * 1000;
   private static readonly DISCOVER_EVENT = 'discover';
 
   private readonly serviceUuid: string;
@@ -69,12 +70,19 @@ export class BluetoothScanner {
 
     await this.noble.stopScanningAsync();
     this.noble.stop();
+    this.noble.reset();
     this.noble = null;
 
     if (this.autoRecoveryHandler) {
       clearTimeout(this.autoRecoveryHandler);
       this.autoRecoveryHandler = undefined;
     }
+  }
+
+  private async restart(powerOnTimeout: number, discoveryTimeout: number) {
+    await this.stop();
+    await new Promise(resolve => setTimeout(resolve, BluetoothScanner.RESTART_COOLDOWN_INTERVAL));
+    await this.start(powerOnTimeout, discoveryTimeout);
   }
 
   public onDiscover(callback: (device: BluetoothAdvertisment) => void) {
@@ -124,8 +132,7 @@ export class BluetoothScanner {
     this.log.info('No devices discovered within timeout, restarting bluetooth scanner...');
 
     try {
-      await this.stop();
-      await this.start(powerOnTimeout, discoveryTimeout);
+      await this.restart(powerOnTimeout, discoveryTimeout);
     } catch (error) {
       this.log.error(`Restart failed:`, formatError(error));
       this.scheduleAutoRecovery(powerOnTimeout, discoveryTimeout);
